@@ -1,7 +1,7 @@
 import mxgraph from '../mxgraph/mxgraph';
 const {mxConstants } = mxgraph;
 
-const entityIcon = '../assets/logo.png';
+const entityIcon = require('../../public/icon/example.png');
 
 export const toolbarItems = [
     {

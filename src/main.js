@@ -7,6 +7,8 @@ import './assets/css/global.css'
 import router from './router'
 import './plugins/element.js'
 
+import * as R from 'ramda'
+Vue.prototype.R = R
 
 Vue.config.productionTip = false
 
