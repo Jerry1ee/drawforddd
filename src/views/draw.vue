@@ -13,30 +13,9 @@
               <template slot="title" style="background-color: #8E8E8E;color: #3C4043">
                 DDD模版
               </template>
-<!--              <el-row type="flex">-->
-<!--                <el-col>-->
-<!--                  <div ref="toolItem" class="toolItem">-->
-<!--                    <el-row>-->
-<!--                      <img :src="toolbarItems[0]['icon']">-->
-<!--                    </el-row>-->
-<!--                    <span>{{toolbarItems[0].title}}</span>-->
-<!--                  </div>-->
-<!--                </el-col>-->
-<!--                <el-col><div>值对象</div></el-col>-->
-<!--              </el-row>-->
-<!--              <el-row type="flex">-->
-<!--                <el-col><div>领域服务</div></el-col>-->
-<!--                <el-col><div>领域事件</div></el-col>-->
-<!--              </el-row>-->
-<!--              <el-col><div>聚合</div></el-col>-->
-<!--              <el-col><div>聚合根</div></el-col>-->
-<!--              <el-row type="flex">-->
-<!--                <el-col><div>资源库</div></el-col>-->
-<!--                <el-col><div>工厂</div></el-col>-->
-<!--              </el-row>-->
               <ul>
                 <li v-for="item in toolbarItems" :key="item['title']" ref="toolItem">
-                  <img :src="item['icon']" :alt="item['title']">
+                  <img :src="item['icon']" :alt="item['title']" class="img">
                   <span>{{item['title']}}</span>
 
                 </li>
@@ -58,7 +37,7 @@
       <el-divider direction="vertical"></el-divider>
       <!--  画布区域    -->
       <el-main id="main">
-        <div class="graphContainer" ref="container"></div>
+        <div id="graphContainer" class="graphContainer" ref="container"></div>
 
       </el-main>
     </el-container>
@@ -72,7 +51,7 @@ import {toolbarItems} from './toolbar'
 
 //导入mxgraph依赖
 import mxgraph from '../mxgraph/mxgraph';
-const {mxGraph, mxEvent, mxUtils } = mxgraph;
+const {mxEvent, mxUtils, mxEditor,mxGraphHandler, mxCell, mxGeometry, mxGraphModel } = mxgraph;
 
 //导入graph容器组件
 
@@ -82,8 +61,9 @@ export default {
   data() {
     return {
       activeNames: ['1'],
-
+      editor: null,
       graph: null,
+      container: null,
 
     };
   },
@@ -99,7 +79,13 @@ export default {
 
     //定义一个创建graph的方法
     createGraph() {
-      this.graph = new mxGraph(this.$refs.container)
+      //生成editor编辑器
+      this.container = document.getElementById('graphContainer');
+      let editor = new mxEditor();
+      editor.setGraphContainer(this.container);
+      this.graph = editor.graph;
+      this.editor = editor;
+
     },
 
     //初始化
@@ -107,31 +93,88 @@ export default {
       if (this.R.isNil(this.graph)) {
         return
       }
+
+      let config = mxUtils.load('keyhandler-minimal.xml').getDocumentElement();
+      this.editor.configure(config);
+
+
+      // this.graph.setAllowDanglingEdges(false);
+      this.graph.setPanning(true);  //允许右键拖动背景画布
+      this.graph.setHtmlLabels(true); //允许html文本
       this.graph.setConnectable(true) // 允许连线
-      this.graph.setCellsEditable(false) // 不可修改
-      this.graph.convertValueToString = (cell) => { // 根据cell生成显示的标签
-        return this.R.prop('title', cell)
-      }
+      this.graph.setCellsEditable(true) // 不可修改
+      // this.graph.convertValueToString = (cell) => { // 根据cell生成显示的标签
+      //   return this.R.prop('title', cell)
+      // }
+
       this.graph.addListener(mxEvent.DOUBLE_CLICK, (graph, evt) => { // 监听双击事件
         const cell = this.R.pathOr([], ['properties', 'cell'], evt)
+        // this.editor.execute('delete',cell)
 
         console.info(cell + '被双击了') // 在控制台输出双击的cell
       })
+
+      //设置子元素并入父元素
+      let graphHandlerGetInitialCellForEvent = mxGraphHandler.prototype.getInitialCellForEvent;
+      mxGraphHandler.prototype.getInitialCellForEvent = function()
+      {
+        let cell = graphHandlerGetInitialCellForEvent.apply(this, arguments);
+
+        if (this.graph.isPart(cell))
+        {
+          cell = this.graph.getModel().getParent(cell)
+        }
+        return cell;
+      };
+
+      // Disables the built-in context menu
+
+      mxEvent.disableContextMenu(this.container);
+
+
+      this.graph.foldingEnabled = false;
+      this.graph.recursiveResize = true;
+
+      this.graph.isPart = function(cell)
+      {
+        return this.getCurrentCellStyle(cell)['constituent'] == '1';
+      };
     },
 
     //添加cell
     // 工具箱对象， x坐标，y坐标
+    //根据 toolItems中的不同对象的不同参数，创建不同的cell，进行添加
     addCell(toolItem, x, y) {
-      const {width, height} = toolItem
+      const {width, height} = toolItem;
+      const value = toolItem['value'];
       const styleObj = toolItem['style']
-      const style = Object.keys(styleObj).map((attr) => `${attr}=${styleObj[attr]}`).join(';')
+      const cellStyle = Object.keys(styleObj).map((attr) => `${attr}=${styleObj[attr]}`).join(';')
+      const children = toolItem['children']
       const parent = this.graph.getDefaultParent()
+
 
       this.graph.getModel().beginUpdate()
       try {
-        let vertex = this.graph.insertVertex(parent, null, null, x, y, width, height, style)
 
-        vertex.title = toolItem['title']
+        //添加顶级cell
+        console.log(value)
+        let cell = new mxCell(value, new mxGeometry(x, y, width, height), cellStyle)
+
+        cell.vertex = true
+
+        //添加子cell
+        for(let i=0; i<children.length;i++){
+
+          this.graph.insertVertex(
+              cell, null, children[i]['value'],
+              children[i]['offsetX'], children[i]['offsetY'],children[i]['width'], children[i]['height'],
+              children[i]['style']+';constituent=1;'
+          );
+        }
+
+        // vertex.title = toolItem['title']
+        this.graph.addCell(cell, parent)
+
       } finally {
         this.graph.getModel().endUpdate()
       }
@@ -193,6 +236,11 @@ export default {
 
 .toolItem {
 
+}
+
+.img{
+  height: 20px;
+  width: 20px;
 }
 
 
