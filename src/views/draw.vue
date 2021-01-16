@@ -11,7 +11,7 @@
           <el-collapse v-model="activeNames" @change="handleChange" class="el-collapse" >
             <el-collapse-item name="1" >
               <template slot="title" style="background-color: #8E8E8E;color: #3C4043">
-                DDD模版
+                DDD 战术模式
               </template>
               <ul>
                 <li v-for="item in toolbarItems" :key="item['title']" ref="toolItem">
@@ -51,8 +51,9 @@ import {toolbarItems} from './toolbar'
 
 //导入mxgraph依赖
 import mxgraph from '../mxgraph/mxgraph';
-const {mxEvent, mxUtils, mxEditor,mxGraphHandler, mxCell, mxGeometry, mxGraphModel } = mxgraph;
+const {mxEvent, mxUtils, mxEditor,mxGraphHandler, mxCell, mxGeometry, mxConnectionHandler, mxImage, mxEdgeStyle, mxConstants } = mxgraph;
 
+const connectorIcon = require('../../public/icon/connector.gif');
 //导入graph容器组件
 
 export default {
@@ -77,7 +78,7 @@ export default {
       console.log(val);
     },
 
-    //定义一个创建graph的方法
+    //生成画布，编辑器
     createGraph() {
       //生成editor编辑器
       this.container = document.getElementById('graphContainer');
@@ -88,7 +89,7 @@ export default {
 
     },
 
-    //初始化
+    //初始化，画布设置一些属性
     initGraph() {
       if (this.R.isNil(this.graph)) {
         return
@@ -97,12 +98,24 @@ export default {
       let config = mxUtils.load('keyhandler-minimal.xml').getDocumentElement();
       this.editor.configure(config);
 
+      // Defines an icon for creating new connections in the connection handler.
+      // This will automatically disable the highlighting of the source vertex.
+      mxConnectionHandler.prototype.connectImage = new mxImage(connectorIcon, 16, 16);
 
       // this.graph.setAllowDanglingEdges(false);
+
+      //设置连线样式
+      let style = this.graph.getStylesheet().getDefaultEdgeStyle();
+      style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
+      style['edgeStyle'] = 'orthogonalEdgeStyle'
+      style['curved'] = '1'
+
+      this.graph.setDropEnabled(true);    //允许将子元素放入父元素中
+      this.graph.setSplitEnabled(false);  //不允许分割元素
+      this.graph.setAllowDanglingEdges(false);  //？？？
       this.graph.setPanning(true);  //允许右键拖动背景画布
       this.graph.setHtmlLabels(true); //允许html文本
       this.graph.setConnectable(true) // 允许连线
-      this.graph.setCellsEditable(true) // 不可修改
       // this.graph.convertValueToString = (cell) => { // 根据cell生成显示的标签
       //   return this.R.prop('title', cell)
       // }
@@ -112,7 +125,9 @@ export default {
         // this.editor.execute('delete',cell)
 
         console.info(cell + '被双击了') // 在控制台输出双击的cell
+        console.log(cell.getValue())
       })
+
 
       //设置子元素并入父元素
       let graphHandlerGetInitialCellForEvent = mxGraphHandler.prototype.getInitialCellForEvent;
@@ -142,9 +157,12 @@ export default {
     },
 
     //添加cell
-    // 工具箱对象， x坐标，y坐标
+    // 父元素位置 工具箱对象， x坐标，y坐标
     //根据 toolItems中的不同对象的不同参数，创建不同的cell，进行添加
-    addCell(toolItem, x, y) {
+    addCell(dropCell, toolItem, x, y) {
+
+      const realX = x;
+      const realY = y;
       const {width, height} = toolItem;
       const value = toolItem['value'];
       const styleObj = toolItem['style']
@@ -153,12 +171,13 @@ export default {
       const parent = this.graph.getDefaultParent()
 
 
+
       this.graph.getModel().beginUpdate()
       try {
 
         //添加顶级cell
         console.log(value)
-        let cell = new mxCell(value, new mxGeometry(x, y, width, height), cellStyle)
+        let cell = new mxCell(value, new mxGeometry(realX, realY, width, height), cellStyle)
 
         cell.vertex = true
 
@@ -194,7 +213,7 @@ export default {
         console.log(width)
 
         const dropHandler = (graph, evt, cell, x, y) => {
-          this.addCell(toolItem, x, y)
+          this.addCell(graph, toolItem, x, y)
         }
         const createDragPreview = () => {
           const elt = document.createElement('div')
@@ -205,7 +224,14 @@ export default {
           return elt
         }
 
-        mxUtils.makeDraggable(dom, this.graph, dropHandler, createDragPreview(), 0, 0, false, true)
+        // 获取绘制cell位置的信息，如果释放位置有cell，获取该cell是否允许子元素加入
+        const getDropTarget = (graph, x, y) => {
+          const cell = graph.getCellAt(x, y)
+
+          return this.R.propOr(null, 'dropAble', cell) ? cell : null
+        }
+
+        mxUtils.makeDraggable(dom, this.graph, dropHandler, createDragPreview(), 0, 0, false, true, true, getDropTarget)
       })
     },
   },
