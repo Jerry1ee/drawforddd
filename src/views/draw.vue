@@ -2,7 +2,37 @@
 <!--  画画布局-->
   <el-container class="draw-container">
 <!--    头部菜单-->
-    <el-header id="header" style="background-color: #3C4043">Header</el-header>
+    <el-header id="header" style="background-color: #3C4043">
+      <el-row>
+        <div id="graphMenu" class="graphMenu" ref="graphMenu">
+            <el-menu
+                :default-active="activeIndex2"
+                class="el-menu"
+                mode="horizontal"
+                @select="handleSelect"
+                background-color="#3C4043"
+                text-color="#fff"
+                active-text-color="#ffd04b">
+              <el-menu-item index="1">主页</el-menu-item>
+              <el-submenu index="2">
+                <template slot="title">文件</template>
+                <el-menu-item index="2-1">导入</el-menu-item>
+                <el-menu-item index="2-2">导出</el-menu-item>
+                <el-menu-item index="2-3"></el-menu-item>
+                <el-submenu index="2-4">
+                  <template slot="title">选项4</template>
+                  <el-menu-item index="2-4-1">选项1</el-menu-item>
+                  <el-menu-item index="2-4-2">选项2</el-menu-item>
+                  <el-menu-item index="2-4-3">选项3</el-menu-item>
+                </el-submenu>
+              </el-submenu>
+              <el-menu-item index="3">帮助</el-menu-item>
+              <el-menu-item index="4"><a href="https://www.ele.me" target="_blank">其他</a></el-menu-item>
+            </el-menu>
+          </div>
+      </el-row>
+
+    </el-header>
     <el-container>
       <!-- 侧边栏菜单-->
       <el-aside id="sidebar" width="300px">
@@ -33,10 +63,18 @@
         </div>
 
       </el-aside>
-      <!--      分割线-->
-      <el-divider direction="vertical"></el-divider>
+<!--      &lt;!&ndash;      分割线&ndash;&gt;-->
+<!--      <el-divider direction="vertical"></el-divider>-->
       <!--  画布区域    -->
       <el-main id="main">
+        <div id="graphButton" class="graphButton" ref="graphButton">
+          <el-button size="mini"  icon="el-icon-edit">验证</el-button>
+          <el-button size="mini"  icon="el-icon-delete" @click="deleteCell">删除</el-button>
+          <el-button size="mini"  icon="el-icon-top-left" @click="undo">撤销</el-button>
+          <el-button size="mini"  icon="el-icon-zoom-out" @click="zoomOut"></el-button>
+          <el-button size="mini"  icon="el-icon-zoom-in" @click="zoomIn"></el-button>
+          <el-button size="mini" @click="showProperties">测试<i class="el-icon-upload el-icon--right"></i></el-button>
+        </div>
         <div id="graphContainer" class="graphContainer" ref="container"></div>
 
       </el-main>
@@ -66,6 +104,10 @@ export default {
       graph: null,
       container: null,
 
+      //menu
+      activeIndex: '1',
+      activeIndex2: '1'
+
     };
   },
 
@@ -76,6 +118,35 @@ export default {
   methods: {
     handleChange(val) {
       console.log(val);
+    },
+
+    handleSelect(key, keyPath) {
+      console.log(key, keyPath);
+    },
+
+    //删除cell
+    deleteCell(cell){
+      this.editor.execute('delete', cell);
+    },
+
+    //撤销操作
+    undo(cell){
+      this.editor.execute('undo', cell)
+    },
+
+    //放大画布
+    zoomIn(cell){
+      this.editor.execute('zoomIn', cell);
+    },
+
+    //缩小画布
+    zoomOut(cell){
+      this.editor.execute('zoomOut', cell);
+    },
+
+    //
+    showProperties(cell){
+      this.editor.execute('edit', cell);
     },
 
     //生成画布，编辑器
@@ -95,7 +166,7 @@ export default {
         return
       }
 
-      let config = mxUtils.load('keyhandler-minimal.xml').getDocumentElement();
+      let config = mxUtils.load('keyhandler-commons.xml').getDocumentElement();
       this.editor.configure(config);
 
       // Defines an icon for creating new connections in the connection handler.
@@ -252,12 +323,26 @@ export default {
 
 .draw-container{
   height: 100%;
+  width: 100%;
 }
 .graphContainer {
   position: relative;
   flex: 7;
   height: 100%;
   width: 100%;
+}
+
+
+
+.graphMenu{
+  position: relative;
+  left: 300px;
+}
+
+.graphButton{
+  position: relative;
+  top: -10px;
+
 }
 
 .toolItem {
@@ -267,6 +352,18 @@ export default {
 .img{
   height: 20px;
   width: 20px;
+}
+
+.el-aside{
+  background-color: #b0b0b0;
+}
+
+.el-collapse-item{
+  background-color: #3C4043;
+}
+
+.el-footer{
+  background-color: #8E8E8E;
 }
 
 
