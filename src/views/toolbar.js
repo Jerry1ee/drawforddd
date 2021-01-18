@@ -5,10 +5,10 @@ const entityIcon = require('../../public/icon/example.png');
 const valueObjectIcon = require('../../public/icon/example.png');
 const domainServiceIcon = require('../../public/icon/example.png');
 const domainEventIcon = require('../../public/icon/example.png');
-// const moduleIcon = require('../../public/icon/example.png');
-// const aggregateIcon = require('../../public/icon/example.png');
-// const repositoryIcon = require('../../public/icon/example.png');
-// const factoryIcon = require('../../public/icon/example.png');
+const moduleIcon = require('../../public/icon/example.png');
+const aggregateIcon = require('../../public/icon/example.png');
+const repositoryIcon = require('../../public/icon/example.png');
+const factoryIcon = require('../../public/icon/example.png');
 // const antiCorrosionLayerIcon = require('../../public/icon/example.png');
 
 //
@@ -113,7 +113,6 @@ export const toolbarItems = [
             marginBottom:'0',
             editable:'0',
             autosize:'1'
-
 
         },
 
@@ -291,5 +290,235 @@ export const toolbarItems = [
             editable:'0',
         },
 
+    },
+
+    /**
+     * 模块
+     * 模块是一个命名的容器，用于存放内聚的，可以将不同的内聚类放在不同的模块下进行接藕
+     * DDD中其实不太关注
+     * java中模块命名首先顶级域名开头，通常是com；然后在点后紧跟公司/组织名；接下来一层是限界上下文；
+     *      再往下是domain层；再往下是模型中的类和接口等。这种命名规范兼容六边形架构和分层架构，但是这种命名规范并不强求
+     * 模块设计时不能机械地组织模块、设计松耦合的模块、杜绝循环依赖，在父子模块之间放松原则以及不要讲模块设计成静态概念（难以测量）
+     * 模块应该包含该模块下所有的实体、聚合、领域服务等等属性，选填
+     * 模块不应该要求与每一个组件进行连线（否则可能会造成DDD模型过于混乱），可能只是创建出来并且包含模块中的一些实体
+     *      、聚合等模型便于开发人员理解，因此模块设计大小可能会大一些
+     */
+    {
+        icon: moduleIcon,
+        title: 'Module',
+        value: '&lt;&lt;Module&gt;&gt;'+'</br>moduleName',
+        width: 260,
+        height: 120,
+        dropAble: false,
+
+        //实体里还有其他子cell，这些cell都应该为vertex
+        //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
+        children:[
+            {
+                value:'elementInModule: name(String)',
+                offsetX : 0,
+                offsetY : 35,
+                width: 260,
+                height: 85,
+                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+            }
+
+        ],
+        style: {
+            fillColor: ' none',
+            strokeColor: '#000000',
+            strokeWidth: '1',
+            shape: mxConstants.SHAPE_RECTANGLE,
+            fontColor:'black',
+            fontStyle: '0',
+            align: 'center',
+            verticalAlign:'top',
+            childLayout:'stackLayout',
+            horizontal:'1',
+            startSize:'55',
+            horizontalStack:'0',
+            resizeParent:'1',
+            resizeParentMax:'0',
+            resizeLast:'0',
+            collapsible:'0',
+            html:'1',
+            marginBottom:'0',
+            editable:'0',
+            autosize:'1'
+        },
+    },
+
+    /**
+     * 聚合
+     * 需要将实体和值对象聚类到一致性边界内时，可以使用聚合作为容器
+     * 聚合需要跟实体作为聚合的唯一标识，必填
+     * 聚合内部所有对象应该保持一致性，应该含有实体以及值对象，选填
+     * 是否需要一些保证一致性的方法？选填
+     * 怎样表示聚合和聚合内部实例
+     */
+    {
+        icon: aggregateIcon,
+        title: 'Aggregate',
+        value: '&lt;&lt;Aggregate&gt;&gt;'+'</br>aggregateName',
+        width: 200,
+        height: 100,
+        dropAble: false,
+
+        //实体里还有其他子cell，这些cell都应该为vertex
+        //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
+        children:[
+            {
+                value:'+identity : ID（String）',
+                offsetX : 0,
+                offsetY : 30,
+                width: 200,
+                height: 30,
+                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+            },
+            {
+                value:'internalObject : name(String)',
+                offsetX : 0,
+                offsetY : 60,
+                width: 200,
+                height: 60,
+                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+            }
+
+        ],
+        style: {
+            fillColor: ' none',
+            strokeColor: '#000000',
+            strokeWidth: '1',
+            shape: mxConstants.SHAPE_RECTANGLE,
+            fontColor:'black',
+            fontStyle: '0',
+            align: 'center',
+            verticalAlign:'top',
+            childLayout:'stackLayout',
+            horizontal:'1',
+            startSize:'55',
+            horizontalStack:'0',
+            resizeParent:'1',
+            resizeParentMax:'0',
+            resizeLast:'0',
+            collapsible:'0',
+            html:'1',
+            marginBottom:'0',
+            editable:'0',
+            autosize:'1'
+        },
+    },
+
+    /**
+     * 资源库
+     * 通常将聚合实例(有时候也可以是实体实例）放在资源库中，之后再通过该资源库获取相同的聚合实例
+     * 资源库对应的聚合或者实体实例，必填
+     * 资源库可能存在的额外行为（如校验方法、计数方法等等行为），选填
+     * 可以与所存储的聚合类进行连线，从而使用户获得清晰的了解
+     *
+     */
+    {
+        icon: repositoryIcon,
+        title: 'Repository',
+        value: '&lt;&lt;Repository&gt;&gt;'+'</br>repositoryName',
+        width: 200,
+        height: 100,
+        dropAble: false,
+
+        //实体里还有其他子cell，这些cell都应该为vertex
+        //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
+        children:[
+            {
+                value:'+aggregate : name（String）',
+                offsetX : 0,
+                offsetY : 30,
+                width: 200,
+                height: 30,
+                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+            },
+            {
+                value:'addActions : function',
+                offsetX : 0,
+                offsetY : 60,
+                width: 200,
+                height: 40,
+                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+            }
+
+        ],
+        style: {
+            fillColor: ' none',
+            strokeColor: '#000000',
+            strokeWidth: '1',
+            shape: mxConstants.SHAPE_RECTANGLE,
+            fontColor:'black',
+            fontStyle: '0',
+            align: 'center',
+            verticalAlign:'top',
+            childLayout:'stackLayout',
+            horizontal:'1',
+            startSize:'55',
+            horizontalStack:'0',
+            resizeParent:'1',
+            resizeParentMax:'0',
+            resizeLast:'0',
+            collapsible:'0',
+            html:'1',
+            marginBottom:'0',
+            editable:'0',
+            autosize:'1'
+        },
+    },
+
+    /**
+     * 工厂
+     * 工厂是一种具有创建复杂对象和聚合职责的单独对象
+     * 工厂偏向于代码实现阶段，对于DDD建模过程起到的作用可能不大
+     * 工厂创建的实体或聚合对象，必填，不然工厂没有存在的意义（一个工厂是否可以创建多个对象？）
+     * 另：工厂应该与工厂所创建的对象有连线，用来表明工厂与实体、聚合的创建关系
+     */
+    {
+        icon: factoryIcon,
+        title: 'Factory',
+        value: '&lt;&lt;factory&gt;&gt;'+'</br>factoryName',
+        width: 220,
+        height: 78,
+        dropAble: false,
+
+        //实体里还有其他子cell，这些cell都应该为vertex
+        //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
+        children:[
+            {
+                value:'+objectName:name(String)',
+                offsetX : 0,
+                offsetY : 30,
+                width: 220,
+                height: 50,
+                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+            }
+
+        ],
+        style: {
+            fillColor: ' none',
+            strokeColor: '#000000',
+            strokeWidth: '1',
+            shape: mxConstants.SHAPE_RECTANGLE,
+            fontColor:'black',
+            fontStyle: '0',
+            align: 'center',
+            verticalAlign:'top',
+            childLayout:'stackLayout',
+            horizontal:'1',
+            startSize:'55',
+            horizontalStack:'0',
+            resizeParent:'1',
+            resizeParentMax:'0',
+            resizeLast:'0',
+            collapsible:'0',
+            html:'1',
+            marginBottom:'0',
+            editable:'0',
+            autosize:'1'
+        },
     },
 ]
