@@ -149,6 +149,9 @@ export default {
       this.editor.execute('edit', cell);
     },
 
+
+
+
     //生成画布，编辑器
     createGraph() {
       //生成editor编辑器
@@ -181,6 +184,11 @@ export default {
       style['edgeStyle'] = 'orthogonalEdgeStyle'
       style['curved'] = '1'
 
+
+      mxGraphHandler.prototype.guidesEnabled = true;  //开始拖拽指引功能
+
+
+      this.graph.setTooltips(true);     //鼠标悬停提示
       this.graph.setDropEnabled(true);    //允许将子元素放入父元素中
       this.graph.setSplitEnabled(false);  //不允许分割元素
       this.graph.setAllowDanglingEdges(false);  //？？？
@@ -198,6 +206,11 @@ export default {
         console.info(cell + '被双击了') // 在控制台输出双击的cell
         console.log(cell.getValue())
       })
+
+      //设置右键菜单
+      // this.graph.popupMenuHandler.factoryMethod = function(menu, cell, evt){
+      //
+      // }
 
 
       //设置子元素并入父元素
