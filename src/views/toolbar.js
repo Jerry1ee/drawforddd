@@ -128,7 +128,7 @@ export const toolbarItems = [
         value: '&lt;&lt;Value Object&gt;&gt;',
         width: 150,
         height: 100,
-        dropAble: true, // 是否可以作为drop的对象
+        dropAble: false, // 是否可以作为drop的对象
 
         //实体里还有其他子cell，这些cell都应该为vertex
         //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
@@ -194,7 +194,7 @@ export const toolbarItems = [
     {
         icon: domainServiceIcon,
         title: 'Domain Service',
-        value: '&lt;&lt;Domain Service&gt;&gt;'+'</br>Name',
+        value: '&lt;&lt;Domain Service&gt;&gt;',
         width: 260,
         height: 30,
         dropAble: true, // 是否可以作为drop的对象
@@ -202,6 +202,14 @@ export const toolbarItems = [
         //实体里还有其他子cell，这些cell都应该为vertex
         //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
         children:[
+            {
+                value:'ServiceName',
+                offsetX : 0,
+                offsetY : 15,
+                width: 260,
+                height: 15,
+                style:'',
+            },
             {
                 value:' input : type',
                 offsetX : 0,
@@ -258,21 +266,27 @@ export const toolbarItems = [
         title: 'Domain Event',
         value: '&lt;&lt;Domain Event&gt;&gt;',
         width: 260,
-        height: 30,
+        height: 70,
         dropAble: true, // 是否可以作为drop的对象
 
         //实体里还有其他子cell，这些cell都应该为vertex
         //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
         children:[
-
-
+            {
+                value:'EventName',
+                offsetX : 0,
+                offsetY : 15,
+                width: 260,
+                height: 15,
+                style:'',
+            },
         ],
         style: {
 
             fillColor: ' none',
             strokeColor: '#000000',
             strokeWidth: '1',
-            shape: mxConstants.SHAPE_SWIMLANE,
+            shape: mxConstants.SHAPE_RECTANGLE,
             fontColor:'black',
             fontStyle: '0',
             align: 'center',
