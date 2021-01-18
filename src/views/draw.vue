@@ -13,12 +13,12 @@
                 background-color="#3C4043"
                 text-color="#fff"
                 active-text-color="#ffd04b">
-              <el-menu-item index="1">主页</el-menu-item>
-              <el-submenu index="2">
+              <el-menu-item index="1" class="el_menu_item">主页</el-menu-item>
+              <el-submenu index="2" class="el_menu_item">
                 <template slot="title">文件</template>
                 <el-menu-item index="2-1">导入</el-menu-item>
                 <el-menu-item index="2-2">导出</el-menu-item>
-                <el-menu-item index="2-3"></el-menu-item>
+                <el-menu-item index="2-3">选项3</el-menu-item>
                 <el-submenu index="2-4">
                   <template slot="title">选项4</template>
                   <el-menu-item index="2-4-1">选项1</el-menu-item>
@@ -26,8 +26,10 @@
                   <el-menu-item index="2-4-3">选项3</el-menu-item>
                 </el-submenu>
               </el-submenu>
-              <el-menu-item index="3">帮助</el-menu-item>
-              <el-menu-item index="4"><a href="https://www.ele.me" target="_blank">其他</a></el-menu-item>
+              <el-menu-item index="3" class="el_menu_item"
+                            v-on:click="this.$message('这是一条消息提示')">帮助</el-menu-item>
+              <el-menu-item index="4" class="el_menu_item"><a href="https://www.ele.me"
+                                                                            target="_blank">其他</a></el-menu-item>
             </el-menu>
           </div>
       </el-row>
@@ -35,7 +37,7 @@
     </el-header>
     <el-container>
       <!-- 侧边栏菜单-->
-      <el-aside id="sidebar" width="300px">
+      <el-aside id="sidebar" width="18%">
         <!--  侧边栏 ： 放 DDD特定的模版图-->
         <div>
           <el-collapse v-model="activeNames" @change="handleChange" class="el-collapse" >
@@ -319,6 +321,10 @@ export default {
 
 
 <style scoped>
+.el_menu_item{
+  width:8%;
+  text-align:center;
+}
 
 
 .draw-container{
@@ -365,8 +371,6 @@ export default {
 .el-footer{
   background-color: #8E8E8E;
 }
-
-
 
 
 
