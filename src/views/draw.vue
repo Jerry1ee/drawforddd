@@ -12,19 +12,20 @@
                 @select="handleSelect"
                 background-color="#3C4043"
                 text-color="#fff"
-                active-text-color="#ffd04b">
-              <el-menu-item index="1" class="el_menu_item">主页</el-menu-item>
+                active-text-color="#ffd04b"
+                :router="true">
+              <el-menu-item index="/home" class="el_menu_item">主页</el-menu-item>
               <el-submenu index="2" class="el_menu_item">
                 <template slot="title">文件</template>
-                <el-menu-item index="2-1">导入</el-menu-item>
-                <el-menu-item index="2-2">导出</el-menu-item>
-                <el-menu-item index="2-3">选项3</el-menu-item>
-                <el-submenu index="2-4">
-                  <template slot="title">选项4</template>
-                  <el-menu-item index="2-4-1">选项1</el-menu-item>
+                <el-menu-item index="">导入</el-menu-item>
+                <el-submenu index="">
+                  <template slot="title">导出</template>
+                  <el-menu-item index="" @click="exportXML">XML格式</el-menu-item>
                   <el-menu-item index="2-4-2">选项2</el-menu-item>
                   <el-menu-item index="2-4-3">选项3</el-menu-item>
                 </el-submenu>
+                <el-menu-item index="">导出</el-menu-item>
+                <el-menu-item index="">选项3</el-menu-item>
               </el-submenu>
               <el-menu-item index="3" class="el_menu_item"
                             v-on:click="this.$message('这是一条消息提示')">帮助</el-menu-item>
@@ -91,7 +92,9 @@ import {toolbarItems} from './toolbar'
 
 //导入mxgraph依赖
 import mxgraph from '../mxgraph/mxgraph';
-const {mxEvent, mxUtils, mxEditor,mxGraphHandler, mxCell, mxGeometry, mxConnectionHandler, mxImage, mxEdgeStyle, mxConstants } = mxgraph;
+const {mxEvent, mxUtils, mxEditor,mxGraphHandler, mxCell,
+  mxGeometry, mxConnectionHandler, mxImage, mxEdgeStyle, mxConstants,
+  mxCodec, mxRubberband} = mxgraph;
 
 const connectorIcon = require('../../public/icon/connector.gif');
 //导入graph容器组件
@@ -108,7 +111,10 @@ export default {
 
       //menu
       activeIndex: '1',
-      activeIndex2: '1'
+      activeIndex2: '1',
+
+
+      mxCodec: null,
 
     };
   },
@@ -153,6 +159,19 @@ export default {
 
 
 
+    //导出 xml
+    exportXML(){
+      let encoder = new mxCodec();
+      let node = encoder.encode(this.graph.getModel());
+      let XML = mxUtils.getPrettyXml(node);
+      console.log(XML);
+
+      let blob = new Blob([XML], {type: 'text/xml'});
+      let url = URL.createObjectURL(blob);
+      window.open(url);
+      URL.revokeObjectURL(url); //Releases the resources
+
+    },
 
     //生成画布，编辑器
     createGraph() {
@@ -162,6 +181,7 @@ export default {
       editor.setGraphContainer(this.container);
       this.graph = editor.graph;
       this.editor = editor;
+      this.mxCodec = mxCodec;
 
     },
 
@@ -188,6 +208,16 @@ export default {
 
 
       mxGraphHandler.prototype.guidesEnabled = true;  //开始拖拽指引功能
+      //
+      // let listener = function()
+      // {
+      //   this.graph.validateGraph();
+      // };
+
+      this.editor.validation = true;
+
+      // this.graph.getModel().addListener(mxEvent.CHANGE, listener);
+
 
 
       this.graph.setTooltips(true);     //鼠标悬停提示
@@ -326,6 +356,7 @@ export default {
     this.createGraph()
     this.initGraph()
     this.initToolbar()
+    new mxRubberband(this.graph);
     this.$refs.container.style.background = 'url("../mxgraph/images/grid.gif")'
   }
 }

@@ -219,7 +219,7 @@ export const toolbarItems = [
                 style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
             },
             {
-                value:' input : type',
+                value:' output : type',
                 offsetX : 130,
                 offsetY : 30,
                 width: 130,
