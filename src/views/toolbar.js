@@ -96,7 +96,7 @@ export const toolbarItems = [
             fillColor: ' none',
             strokeColor: '#000000',
             strokeWidth: '1',
-            shape: mxConstants._modules,
+            shape: mxConstants.SHAPE_RECTANGLE,
             fontColor:'black',
             fontStyle: '0',
             align: 'center',
@@ -366,16 +366,16 @@ export const toolbarItems = [
      * 聚合
      * 需要将实体和值对象聚类到一致性边界内时，可以使用聚合作为容器
      * 聚合需要跟实体作为聚合的唯一标识，必填
-     * 聚合内部所有对象应该保持一致性，应该含有实体以及值对象，选填
+     * 聚合内部所有对象应该保持一致性，应该含有实体以及值对象，与实际的实体与值对象进行连线
      * 是否需要一些保证一致性的方法？选填
      * 怎样表示聚合和聚合内部实例
      */
     {
         icon: aggregateIcon,
-        title: 'Aggregate',
-        value: '&lt;&lt;Aggregate&gt;&gt;'+'</br>aggregateName',
-        width: 200,
-        height: 100,
+        title: 'Aggregate Root',
+        value: '&lt;&lt;Aggregate Root&gt;&gt;'+'</br>aggregateRootName',
+        width: 180,
+        height: 90,
         dropAble: false,
 
         //实体里还有其他子cell，这些cell都应该为vertex
@@ -385,18 +385,18 @@ export const toolbarItems = [
                 value:'+identity : ID（String）',
                 offsetX : 0,
                 offsetY : 30,
-                width: 200,
+                width: 180,
                 height: 30,
                 style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
             },
             {
-                value:'internalObject : name(String)',
+                value:'operation : type',
                 offsetX : 0,
                 offsetY : 60,
-                width: 200,
-                height: 60,
+                width: 180,
+                height: 30,
                 style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
-            }
+            },
 
         ],
         style: {
@@ -436,7 +436,7 @@ export const toolbarItems = [
         title: 'Repository',
         value: '&lt;&lt;Repository&gt;&gt;'+'</br>repositoryName',
         width: 200,
-        height: 100,
+        height: 110,
         dropAble: false,
 
         //实体里还有其他子cell，这些cell都应该为vertex
@@ -444,27 +444,27 @@ export const toolbarItems = [
         children:[
             {
                 value:'+aggregate : name（String）',
-                offsetX : 0,
-                offsetY : 30,
-                width: 200,
+                offsetX : 20,
+                offsetY : 42,
+                width: 160,
                 height: 30,
-                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+                style:'fillColor=none;strokeColor=rgba(255,255,255,0.2);fontColor=black;strokeWidth=1;',
             },
             {
                 value:'addActions : function',
-                offsetX : 0,
-                offsetY : 60,
-                width: 200,
-                height: 40,
-                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+                offsetX : 20,
+                offsetY : 72,
+                width: 160,
+                height: 30,
+                style:'fillColor=none;strokeColor=rgba(255,255,255,0.2);fontColor=black;strokeWidth=1',
             }
 
         ],
         style: {
             fillColor: ' none',
             strokeColor: '#000000',
-            strokeWidth: '1',
-            shape: mxConstants.SHAPE_CLOUD,
+            strokeWidth: '0',
+            shape: mxConstants.SHAPE_CYLINDER,
             fontColor:'black',
             fontStyle: '0',
             align: 'center',

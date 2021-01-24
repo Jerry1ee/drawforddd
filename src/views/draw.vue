@@ -70,12 +70,17 @@
       <!--  画布区域    -->
       <el-main id="main">
         <div id="graphButton" class="graphButton" ref="graphButton">
-          <el-button size="mini"  icon="el-icon-edit">验证</el-button>
-          <el-button size="mini"  icon="el-icon-delete" @click="deleteCell">删除</el-button>
-          <el-button size="mini"  icon="el-icon-top-left" @click="undo">撤销</el-button>
-          <el-button size="mini"  icon="el-icon-zoom-out" @click="zoomOut"></el-button>
-          <el-button size="mini"  icon="el-icon-zoom-in" @click="zoomIn"></el-button>
-          <el-button size="mini" @click="showProperties">测试<i class="el-icon-upload el-icon--right"></i></el-button>
+          <el-button size="mini"  icon="el-icon-edit" style="width:7%;text-align:center">验证</el-button>
+          <el-button size="mini"  icon="el-icon-delete" style="width:7%;text-align:center"
+                     @click="deleteCell">删除</el-button>
+          <el-button size="mini"  icon="el-icon-top-left" style="width:7%;text-align:center"
+                     @click="undo">撤销</el-button>
+          <el-button size="mini"  icon="el-icon-zoom-out"
+                     @click="zoomOut"></el-button>
+          <el-button size="mini"  icon="el-icon-zoom-in"
+                     @click="zoomIn"></el-button>
+          <el-button size="mini" @click="showProperties" style="width:7%;text-align:center"
+          >测试<i class="el-icon-upload el-icon--right"></i></el-button>
         </div>
         <div id="graphContainer" class="graphContainer" ref="container"></div>
 
