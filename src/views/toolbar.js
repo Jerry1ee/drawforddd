@@ -9,6 +9,7 @@ const moduleIcon = require('../../public/icon/example.png');
 const aggregateIcon = require('../../public/icon/example.png');
 const repositoryIcon = require('../../public/icon/example.png');
 const factoryIcon = require('../../public/icon/example.png');
+const eventStepIcon = require('../../public/icon/example.png');
 // const antiCorrosionLayerIcon = require('../../public/icon/example.png');
 
 //
@@ -219,7 +220,7 @@ export const toolbarItems = [
                 style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
             },
             {
-                value:' input : type',
+                value:' output : type',
                 offsetX : 130,
                 offsetY : 30,
                 width: 130,
@@ -535,4 +536,42 @@ export const toolbarItems = [
             autosize:'1'
         },
     },
+
+    /**
+     * 领域事件 步骤
+     */
+    {
+        icon: eventStepIcon,
+        title: 'Event Step',
+        value: 'step...',
+        width: 100,
+        height: 30,
+        dropAble: false,
+
+        children:[
+
+        ],
+        style: {
+            fillColor: ' none',
+            strokeColor: '#000000',
+            strokeWidth: '1',
+            shape: mxConstants.SHAPE_RECTANGLE,
+            fontColor:'black',
+            fontStyle: '0',
+            align: 'center',
+            verticalAlign:'top',
+            childLayout:'stackLayout',
+            horizontal:'1',
+            startSize:'55',
+            horizontalStack:'0',
+            resizeParent:'1',
+            resizeParentMax:'0',
+            resizeLast:'0',
+            collapsible:'0',
+            html:'1',
+            marginBottom:'0',
+            editable:'0',
+            autosize:'1'
+        },
+    }
 ]

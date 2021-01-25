@@ -4,6 +4,7 @@ import VueRouter from 'vue-router'
 import Login from '../views/login.vue'
 import Home from '../views/home.vue'
 import Draw from '../views/draw.vue'
+import Example from '../views/example.vue'
 
 
 
@@ -13,10 +14,12 @@ const routes = [
   { path: '/login', component: Login },
   { path: '/', component: Home},
   { path: '/draw', component:Draw},
+  { path: '/example', component: Example}
 
 ]
 
 const router = new VueRouter({
+  mode: 'history',
   routes
 })
 

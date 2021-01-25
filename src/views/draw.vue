@@ -12,19 +12,20 @@
                 @select="handleSelect"
                 background-color="#3C4043"
                 text-color="#fff"
-                active-text-color="#ffd04b">
-              <el-menu-item index="1" class="el_menu_item">主页</el-menu-item>
+                active-text-color="#ffd04b"
+                :router="true">
+              <el-menu-item index="/home" class="el_menu_item">主页</el-menu-item>
               <el-submenu index="2" class="el_menu_item">
                 <template slot="title">文件</template>
-                <el-menu-item index="2-1">导入</el-menu-item>
-                <el-menu-item index="2-2">导出</el-menu-item>
-                <el-menu-item index="2-3">选项3</el-menu-item>
-                <el-submenu index="2-4">
-                  <template slot="title">选项4</template>
-                  <el-menu-item index="2-4-1">选项1</el-menu-item>
+                <el-menu-item index="">导入</el-menu-item>
+                <el-submenu index="">
+                  <template slot="title">导出</template>
+                  <el-menu-item index="" @click="exportXML">XML格式</el-menu-item>
                   <el-menu-item index="2-4-2">选项2</el-menu-item>
                   <el-menu-item index="2-4-3">选项3</el-menu-item>
                 </el-submenu>
+                <el-menu-item index="">导出</el-menu-item>
+                <el-menu-item index="">选项3</el-menu-item>
               </el-submenu>
               <el-menu-item index="3" class="el_menu_item"
                             v-on:click="this.$message('这是一条消息提示')">帮助</el-menu-item>
@@ -70,17 +71,12 @@
       <!--  画布区域    -->
       <el-main id="main">
         <div id="graphButton" class="graphButton" ref="graphButton">
-          <el-button size="mini"  icon="el-icon-edit" style="width:7%;text-align:center">验证</el-button>
-          <el-button size="mini"  icon="el-icon-delete" style="width:7%;text-align:center"
-                     @click="deleteCell">删除</el-button>
-          <el-button size="mini"  icon="el-icon-top-left" style="width:7%;text-align:center"
-                     @click="undo">撤销</el-button>
-          <el-button size="mini"  icon="el-icon-zoom-out"
-                     @click="zoomOut"></el-button>
-          <el-button size="mini"  icon="el-icon-zoom-in"
-                     @click="zoomIn"></el-button>
-          <el-button size="mini" @click="showProperties" style="width:7%;text-align:center"
-          >测试<i class="el-icon-upload el-icon--right"></i></el-button>
+          <el-button size="mini"  icon="el-icon-edit" @click="validation">验证</el-button>
+          <el-button size="mini"  icon="el-icon-delete" @click="deleteCell">删除</el-button>
+          <el-button size="mini"  icon="el-icon-top-left" @click="undo">撤销</el-button>
+          <el-button size="mini"  icon="el-icon-zoom-out" @click="zoomOut"></el-button>
+          <el-button size="mini"  icon="el-icon-zoom-in" @click="zoomIn"></el-button>
+          <el-button size="mini" @click="showProperties">测试<i class="el-icon-upload el-icon--right"></i></el-button>
         </div>
         <div id="graphContainer" class="graphContainer" ref="container"></div>
 
@@ -96,7 +92,16 @@ import {toolbarItems} from './toolbar'
 
 //导入mxgraph依赖
 import mxgraph from '../mxgraph/mxgraph';
-const {mxEvent, mxUtils, mxEditor,mxGraphHandler, mxCell, mxGeometry, mxConnectionHandler, mxImage, mxEdgeStyle, mxConstants } = mxgraph;
+// import {Entity} from "@/components/patterns/Entity.js";
+const {
+  mxEvent, mxUtils, mxEditor,mxGraphHandler, mxCell,
+  mxGeometry, mxConnectionHandler, mxImage, mxEdgeStyle, mxConstants,
+  mxCodec, mxRubberband,
+} = mxgraph;
+
+//导入ocl验证
+// import { OclEngine } from "@stekoe/ocl.js"
+//导入类
 
 const connectorIcon = require('../../public/icon/connector.gif');
 //导入graph容器组件
@@ -113,8 +118,13 @@ export default {
 
       //menu
       activeIndex: '1',
-      activeIndex2: '1'
+      activeIndex2: '1',
 
+
+      mxCodec: null,
+
+
+      oclEngine: null,
     };
   },
 
@@ -123,6 +133,71 @@ export default {
   },
 
   methods: {
+
+    //验证
+    //使用 ocl 加 规则
+    validation() {
+      //获取当前图形的xml格式表达
+      let encoder = new mxCodec();
+      let node = encoder.encode(this.graph.getModel());
+      let XML = mxUtils.getPrettyXml(node);
+      let domParser = new DOMParser();
+      let xmlDoc = domParser.parseFromString(XML,'text/xml');
+
+      //获取当前xml文档中所有的mxCells标签内容
+      let mxCells = xmlDoc.getElementsByTagName('mxCell');
+
+      if(mxCells.length>2){
+        //添加了元素才开始验证
+        for(let i = 0; i < mxCells.length; i++) {
+          /**
+           * Entity
+           * 如果当前cell的 value 为 &lt;&lt;Entity&gt;&gt;且 parent 为 1，那么该cell为实体
+           * 该cell 的id+1 为 该实体的 className
+           * 该cell 的id+2 为 该实体的 identity
+           */
+          if(mxCells[i].getAttribute('value')=='&lt;&lt;Entity&gt;&gt;' &&
+              mxCells[i].getAttribute('parent') == 1){
+            let identity = mxCells[i+2].getAttribute('value');
+            identity.trim();
+            console.log(identity)
+            if(identity == '+Identity:type'||identity == ''){
+              alert("请修改实体的唯一标识")
+            }
+          }
+
+          /**
+           * Value Object
+           */
+
+          /**
+           * Domain Service
+           */
+
+          /**
+           * Domain Event
+           */
+
+          /**
+           * Aggregate
+           */
+
+          /**
+           * Repository
+           */
+
+          /**
+           * Factory
+           */
+
+          /**
+           * ACL
+           */
+        }
+      }
+
+
+    },
     handleChange(val) {
       console.log(val);
     },
@@ -158,6 +233,19 @@ export default {
 
 
 
+    //导出 xml
+    exportXML(){
+      let encoder = new mxCodec();
+      let node = encoder.encode(this.graph.getModel());
+      let XML = mxUtils.getPrettyXml(node);
+      console.log(XML);
+
+      let blob = new Blob([XML], {type: 'text/xml'});
+      let url = URL.createObjectURL(blob);
+      window.open(url);
+      URL.revokeObjectURL(url); //Releases the resources
+
+    },
 
     //生成画布，编辑器
     createGraph() {
@@ -167,6 +255,7 @@ export default {
       editor.setGraphContainer(this.container);
       this.graph = editor.graph;
       this.editor = editor;
+      this.mxCodec = mxCodec;
 
     },
 
@@ -193,6 +282,16 @@ export default {
 
 
       mxGraphHandler.prototype.guidesEnabled = true;  //开始拖拽指引功能
+      //
+      // let listener = function()
+      // {
+      //   this.graph.validateGraph();
+      // };
+
+      this.editor.validation = true;
+
+      // this.graph.getModel().addListener(mxEvent.CHANGE, listener);
+
 
 
       this.graph.setTooltips(true);     //鼠标悬停提示
@@ -213,6 +312,13 @@ export default {
         console.info(cell + '被双击了') // 在控制台输出双击的cell
         console.log(cell.getValue())
       })
+
+      //在 editing stopped 时 触发
+      // this.graph.addListener(mxEvent.CELLS_ADDED, (graph, evt) => {
+      //   const cell = this.R.pathOr([], ['properties', 'cell'], evt)
+      //   console.log(cell.toString())
+      // });
+
 
       //设置右键菜单
       // this.graph.popupMenuHandler.factoryMethod = function(menu, cell, evt){
@@ -252,6 +358,7 @@ export default {
     //根据 toolItems中的不同对象的不同参数，创建不同的cell，进行添加
     addCell(dropCell, toolItem, x, y) {
 
+      console.log('drop:'+dropCell);
       const realX = x;
       const realY = y;
       const {width, height} = toolItem;
@@ -260,8 +367,6 @@ export default {
       const cellStyle = Object.keys(styleObj).map((attr) => `${attr}=${styleObj[attr]}`).join(';')
       const children = toolItem['children']
       const parent = this.graph.getDefaultParent()
-
-
 
       this.graph.getModel().beginUpdate()
       try {
@@ -331,6 +436,7 @@ export default {
     this.createGraph()
     this.initGraph()
     this.initToolbar()
+    new mxRubberband(this.graph);
     this.$refs.container.style.background = 'url("../mxgraph/images/grid.gif")'
   }
 }
