@@ -1,4 +1,5 @@
-export const rules = {
+export function validate() {
+
     /**
      * Entity
      */
@@ -30,4 +31,5 @@ export const rules = {
     /**
      * ACL
      */
+
 }
