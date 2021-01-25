@@ -71,7 +71,7 @@
       <!--  画布区域    -->
       <el-main id="main">
         <div id="graphButton" class="graphButton" ref="graphButton">
-          <el-button size="mini"  icon="el-icon-edit">验证</el-button>
+          <el-button size="mini"  icon="el-icon-edit" @click="validation">验证</el-button>
           <el-button size="mini"  icon="el-icon-delete" @click="deleteCell">删除</el-button>
           <el-button size="mini"  icon="el-icon-top-left" @click="undo">撤销</el-button>
           <el-button size="mini"  icon="el-icon-zoom-out" @click="zoomOut"></el-button>
@@ -92,9 +92,16 @@ import {toolbarItems} from './toolbar'
 
 //导入mxgraph依赖
 import mxgraph from '../mxgraph/mxgraph';
-const {mxEvent, mxUtils, mxEditor,mxGraphHandler, mxCell,
+// import {Entity} from "@/components/patterns/Entity.js";
+const {
+  mxEvent, mxUtils, mxEditor,mxGraphHandler, mxCell,
   mxGeometry, mxConnectionHandler, mxImage, mxEdgeStyle, mxConstants,
-  mxCodec, mxRubberband} = mxgraph;
+  mxCodec, mxRubberband,
+} = mxgraph;
+
+//导入ocl验证
+// import { OclEngine } from "@stekoe/ocl.js"
+//导入类
 
 const connectorIcon = require('../../public/icon/connector.gif');
 //导入graph容器组件
@@ -116,6 +123,8 @@ export default {
 
       mxCodec: null,
 
+
+      oclEngine: null,
     };
   },
 
@@ -124,6 +133,71 @@ export default {
   },
 
   methods: {
+
+    //验证
+    //使用 ocl 加 规则
+    validation() {
+      //获取当前图形的xml格式表达
+      let encoder = new mxCodec();
+      let node = encoder.encode(this.graph.getModel());
+      let XML = mxUtils.getPrettyXml(node);
+      let domParser = new DOMParser();
+      let xmlDoc = domParser.parseFromString(XML,'text/xml');
+
+      //获取当前xml文档中所有的mxCells标签内容
+      let mxCells = xmlDoc.getElementsByTagName('mxCell');
+
+      if(mxCells.length>2){
+        //添加了元素才开始验证
+        for(let i = 0; i < mxCells.length; i++) {
+          /**
+           * Entity
+           * 如果当前cell的 value 为 &lt;&lt;Entity&gt;&gt;且 parent 为 1，那么该cell为实体
+           * 该cell 的id+1 为 该实体的 className
+           * 该cell 的id+2 为 该实体的 identity
+           */
+          if(mxCells[i].getAttribute('value')=='&lt;&lt;Entity&gt;&gt;' &&
+              mxCells[i].getAttribute('parent') == 1){
+            let identity = mxCells[i+2].getAttribute('value');
+            identity.trim();
+            console.log(identity)
+            if(identity == '+Identity:type'||identity == ''){
+              alert("请修改实体的唯一标识")
+            }
+          }
+
+          /**
+           * Value Object
+           */
+
+          /**
+           * Domain Service
+           */
+
+          /**
+           * Domain Event
+           */
+
+          /**
+           * Aggregate
+           */
+
+          /**
+           * Repository
+           */
+
+          /**
+           * Factory
+           */
+
+          /**
+           * ACL
+           */
+        }
+      }
+
+
+    },
     handleChange(val) {
       console.log(val);
     },
@@ -239,6 +313,13 @@ export default {
         console.log(cell.getValue())
       })
 
+      //在 editing stopped 时 触发
+      // this.graph.addListener(mxEvent.CELLS_ADDED, (graph, evt) => {
+      //   const cell = this.R.pathOr([], ['properties', 'cell'], evt)
+      //   console.log(cell.toString())
+      // });
+
+
       //设置右键菜单
       // this.graph.popupMenuHandler.factoryMethod = function(menu, cell, evt){
       //
@@ -277,6 +358,7 @@ export default {
     //根据 toolItems中的不同对象的不同参数，创建不同的cell，进行添加
     addCell(dropCell, toolItem, x, y) {
 
+      console.log('drop:'+dropCell);
       const realX = x;
       const realY = y;
       const {width, height} = toolItem;
@@ -285,8 +367,6 @@ export default {
       const cellStyle = Object.keys(styleObj).map((attr) => `${attr}=${styleObj[attr]}`).join(';')
       const children = toolItem['children']
       const parent = this.graph.getDefaultParent()
-
-
 
       this.graph.getModel().beginUpdate()
       try {
