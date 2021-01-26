@@ -92,7 +92,8 @@ import {toolbarItems} from './toolbar'
 
 //导入mxgraph依赖
 import mxgraph from '../mxgraph/mxgraph';
-// import {Entity} from "@/components/patterns/Entity.js";
+import {Entity} from "@/components/patterns/Entity";
+import {ValueObject} from "@/components/patterns/ValueObject";
 const {
   mxEvent, mxUtils, mxEditor,mxGraphHandler, mxCell,
   mxGeometry, mxConnectionHandler, mxImage, mxEdgeStyle, mxConstants,
@@ -104,6 +105,8 @@ const {
 //导入类
 
 const connectorIcon = require('../../public/icon/connector.gif');
+const {DomainService} = require("@/components/patterns/DomainService");
+const {DomainEvent} = require("@/components/patterns/DomainEvent");
 //导入graph容器组件
 
 export default {
@@ -123,6 +126,14 @@ export default {
 
       mxCodec: null,
 
+      models: [],
+
+      //the map sourceToTarget
+      sourceToTarget: null,
+
+      //the map targetToSource
+      targetToSource: null,
+
 
       oclEngine: null,
     };
@@ -134,6 +145,19 @@ export default {
 
   methods: {
 
+    //获取mxCells 是哪种patterns
+    typeOfCell(mxCell){
+      let mxCellType = mxCell.getAttribute('value');
+      if(mxCellType != null){
+        let result = mxCellType.replace("&lt;&lt;","").replace("&gt;&gt;","");
+        return result;
+      }
+
+    },
+
+    isParentCell(mxCell){
+      return mxCell.getAttribute('parent') == 1;
+    },
     //验证
     //使用 ocl 加 规则
     validation() {
@@ -144,39 +168,83 @@ export default {
       let domParser = new DOMParser();
       let xmlDoc = domParser.parseFromString(XML,'text/xml');
 
+
+      this.models = [];
+      this.sourceToTarget = new Map();
+      this.targetToSource = new Map();
+
       //获取当前xml文档中所有的mxCells标签内容
       let mxCells = xmlDoc.getElementsByTagName('mxCell');
 
+
+
+
       if(mxCells.length>2){
         //添加了元素才开始验证
-        for(let i = 0; i < mxCells.length; i++) {
+
+        //将当前所有边存入哈希表
+        for(let i = 0; i< mxCells.length;i++){
+          if(mxCells[i].getAttribute('edge')==1){
+            let source = mxCells[i].getAttribute('source');
+            let target = mxCells[i].getAttribute('target');
+            this.sourceToTarget.set(source, target);
+            this.targetToSource.set(target, source);
+          }
+        }
+
+        for(let i = 2; i < mxCells.length; i++) {
           /**
            * Entity
            * 如果当前cell的 value 为 &lt;&lt;Entity&gt;&gt;且 parent 为 1，那么该cell为实体
            * 该cell 的id+1 为 该实体的 className
            * 该cell 的id+2 为 该实体的 identity
+           * 强制规则：identity不能为空，必填项
            */
-          if(mxCells[i].getAttribute('value')=='&lt;&lt;Entity&gt;&gt;' &&
-              mxCells[i].getAttribute('parent') == 1){
+          if(this.typeOfCell(mxCells[i])=='Entity' &&
+              this.isParentCell(mxCells[i])){
             let identity = mxCells[i+2].getAttribute('value');
-            identity.trim();
-            console.log(identity)
-            if(identity == '+Identity:type'||identity == ''){
-              alert("请修改实体的唯一标识")
+            let identityTemp = identity.replace(/\s*/g,"");
+            if(identityTemp == '+Identity:type'||identity == '') {
+              this.EntityError('实体的唯一标识(Identity)不能为空或默认值')
+              break;
+            }else {
+              let name = mxCells[i+1].getAttribute('value');
+              let entity = new Entity(name, identityTemp);
+              this.models.push(entity);
             }
           }
 
           /**
            * Value Object
            */
+          if(this.typeOfCell(mxCells[i]) == 'Value Object' &&
+              this.isParentCell(mxCells[i])){
+              let name = mxCells[i+1].getAttribute('value');
+              let valueObject = new ValueObject(name);
+              this.models.push(valueObject);
+          }
 
           /**
            * Domain Service
            */
 
+          if(this.typeOfCell(mxCells[i]).replace(/\s*/g,"") == 'DomainService' &&
+              this.isParentCell(mxCells[i])){
+              let name = mxCells[i+1].getAttribute('value');
+              let domainService = new DomainService(name);
+              this.models.push(domainService);
+          }
+
           /**
            * Domain Event
            */
+
+          if(this.typeOfCell(mxCells[i]).replace(/\s*/g,"") == 'DomainEvent' &&
+              this.isParentCell(mxCells[i])){
+            let name = mxCells[i+1].getAttribute('value');
+            let domainEvent = new DomainEvent(name);
+            this.models.push(domainEvent);
+          }
 
           /**
            * Aggregate
@@ -193,11 +261,27 @@ export default {
           /**
            * ACL
            */
+
         }
+        for(let i = 0; i< this.models.length;i++){
+          console.log(this.models[i]);
+        }
+
+        console.log(this.targetToSource);
+        console.log(this.sourceToTarget);
       }
 
 
     },
+
+    //错误提示
+    EntityError(ErrorMessage) {
+      this.$notify.error({
+        title: '错误',
+        message: ErrorMessage
+      });
+    },
+
     handleChange(val) {
       console.log(val);
     },
