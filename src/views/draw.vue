@@ -126,7 +126,7 @@ export default {
 
       mxCodec: null,
 
-      models: [],
+      models: null,
 
       //the map sourceToTarget
       sourceToTarget: null,
@@ -169,7 +169,7 @@ export default {
       let xmlDoc = domParser.parseFromString(XML,'text/xml');
 
 
-      this.models = [];
+      this.models = new Map();
       this.sourceToTarget = new Map();
       this.targetToSource = new Map();
 
@@ -195,7 +195,7 @@ export default {
         for(let i = 2; i < mxCells.length; i++) {
           /**
            * Entity
-           * 如果当前cell的 value 为 &lt;&lt;Entity&gt;&gt;且 parent 为 1，那么该cell为实体
+           * 如果当前cell的 type为 Entity 且 parent 为 1，那么该cell为实体
            * 该cell 的id+1 为 该实体的 className
            * 该cell 的id+2 为 该实体的 identity
            * 强制规则：identity不能为空，必填项
@@ -203,14 +203,15 @@ export default {
           if(this.typeOfCell(mxCells[i])=='Entity' &&
               this.isParentCell(mxCells[i])){
             let identity = mxCells[i+2].getAttribute('value');
+            let id = mxCells[i].getAttribute('id');
             let identityTemp = identity.replace(/\s*/g,"");
             if(identityTemp == '+Identity:type'||identity == '') {
-              this.EntityError('实体的唯一标识(Identity)不能为空或默认值')
+              this.sendErrorMessage('实体的唯一标识(Identity)不能为空或默认值')
               break;
             }else {
               let name = mxCells[i+1].getAttribute('value');
-              let entity = new Entity(name, identityTemp);
-              this.models.push(entity);
+              let entity = new Entity(id, name, identityTemp);
+              this.models.set(id, entity);
             }
           }
 
@@ -219,20 +220,47 @@ export default {
            */
           if(this.typeOfCell(mxCells[i]) == 'Value Object' &&
               this.isParentCell(mxCells[i])){
+              let id = mxCells[i].getAttribute('id');
               let name = mxCells[i+1].getAttribute('value');
-              let valueObject = new ValueObject(name);
-              this.models.push(valueObject);
+              let valueObject = new ValueObject(id, name);
+              this.models.set(id, valueObject);
           }
 
           /**
            * Domain Service
+           * 如果当前cell的 type 为 DomainService 且 parent 为 1，那么该cell为领域服务
+           * 该cell 的id+1 为 该领域服务的 serviceName
+           * 该cell 的id+2 为 该领域服务的 入参
+           * 该cell 的id+3 为 该领域服务的 出参
+           * 强制规则：入参 出参应该具有连线
+           * 建议规则：入参 出参应该命名
            */
 
           if(this.typeOfCell(mxCells[i]).replace(/\s*/g,"") == 'DomainService' &&
               this.isParentCell(mxCells[i])){
+
+              let id = mxCells[i].getAttribute('id');
               let name = mxCells[i+1].getAttribute('value');
-              let domainService = new DomainService(name);
-              this.models.push(domainService);
+              let inId = mxCells[i+2].getAttribute('id');
+              let outId = mxCells[i+3].getAttribute('id');
+              let domainService = new DomainService(id, name);
+
+
+              //获取 入参对应的对象Id 和 出参对应的对象Id
+              let inObjectId = this.targetToSource.get(inId);
+              let outObjectId = this.sourceToTarget.get(outId);
+              if(inObjectId != null && outObjectId != null) {
+                domainService.in.push(inObjectId);
+                domainService.out.push(outObjectId);
+                this.models.set(id, domainService);
+              }else if(inObjectId == null) {
+                this.sendErrorMessage("领域服务没有连接输入对象！");
+                break;
+              }else {
+                this.sendErrorMessage("领域服务没有连接输出对象！")
+                break;
+              }
+
           }
 
           /**
@@ -263,19 +291,19 @@ export default {
            */
 
         }
-        for(let i = 0; i< this.models.length;i++){
-          console.log(this.models[i]);
-        }
+        console.log('当前存在的所有对象模型：')
+        console.log(this.models)
 
+        console.log('targetToSource:  ')
         console.log(this.targetToSource);
+        console.log('sourceToTarget:  ')
         console.log(this.sourceToTarget);
       }
-
 
     },
 
     //错误提示
-    EntityError(ErrorMessage) {
+    sendErrorMessage(ErrorMessage) {
       this.$notify.error({
         title: '错误',
         message: ErrorMessage
@@ -322,7 +350,6 @@ export default {
       let encoder = new mxCodec();
       let node = encoder.encode(this.graph.getModel());
       let XML = mxUtils.getPrettyXml(node);
-      console.log(XML);
 
       let blob = new Blob([XML], {type: 'text/xml'});
       let url = URL.createObjectURL(blob);
