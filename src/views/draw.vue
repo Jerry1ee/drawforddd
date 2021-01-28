@@ -136,6 +136,8 @@ export default {
 
 
       oclEngine: null,
+
+      notifyPromise: Promise.resolve()
     };
   },
 
@@ -200,17 +202,18 @@ export default {
            * 该cell 的id+2 为 该实体的 identity
            * 强制规则：identity不能为空，必填项
            */
-          if(this.typeOfCell(mxCells[i])=='Entity' &&
+          let typeOfCell = this.typeOfCell(mxCells[i]);
+          if(typeOfCell=='Entity' &&
               this.isParentCell(mxCells[i])){
             let identity = mxCells[i+2].getAttribute('value');
             let id = mxCells[i].getAttribute('id');
             let identityTemp = identity.replace(/\s*/g,"");
             if(identityTemp == '+Identity:type'||identity == '') {
               this.sendErrorMessage('实体的唯一标识(Identity)不能为空或默认值')
-              break;
+
             }else {
               let name = mxCells[i+1].getAttribute('value');
-              let entity = new Entity(id, name, identityTemp);
+              let entity = new Entity(typeOfCell, id, name, identityTemp);
               this.models.set(id, entity);
             }
           }
@@ -218,11 +221,11 @@ export default {
           /**
            * Value Object
            */
-          if(this.typeOfCell(mxCells[i]) == 'Value Object' &&
+          if(typeOfCell == 'Value Object' &&
               this.isParentCell(mxCells[i])){
               let id = mxCells[i].getAttribute('id');
               let name = mxCells[i+1].getAttribute('value');
-              let valueObject = new ValueObject(id, name);
+              let valueObject = new ValueObject(typeOfCell, id, name);
               this.models.set(id, valueObject);
           }
 
@@ -236,14 +239,14 @@ export default {
            * 建议规则：入参 出参应该命名
            */
 
-          if(this.typeOfCell(mxCells[i]).replace(/\s*/g,"") == 'DomainService' &&
+          if(typeOfCell.replace(/\s*/g,"") == 'DomainService' &&
               this.isParentCell(mxCells[i])){
 
               let id = mxCells[i].getAttribute('id');
               let name = mxCells[i+1].getAttribute('value');
               let inId = mxCells[i+2].getAttribute('id');
               let outId = mxCells[i+3].getAttribute('id');
-              let domainService = new DomainService(id, name);
+              let domainService = new DomainService(typeOfCell, id, name);
 
 
               //获取 入参对应的对象Id 和 出参对应的对象Id
@@ -255,10 +258,10 @@ export default {
                 this.models.set(id, domainService);
               }else if(inObjectId == null) {
                 this.sendErrorMessage("领域服务没有连接输入对象！");
-                break;
+
               }else {
                 this.sendErrorMessage("领域服务没有连接输出对象！")
-                break;
+
               }
 
           }
@@ -267,10 +270,10 @@ export default {
            * Domain Event
            */
 
-          if(this.typeOfCell(mxCells[i]).replace(/\s*/g,"") == 'DomainEvent' &&
+          if(typeOfCell.replace(/\s*/g,"") == 'DomainEvent' &&
               this.isParentCell(mxCells[i])){
             let name = mxCells[i+1].getAttribute('value');
-            let domainEvent = new DomainEvent(name);
+            let domainEvent = new DomainEvent(typeOfCell, name);
             this.models.push(domainEvent);
           }
 
@@ -298,16 +301,35 @@ export default {
         console.log(this.targetToSource);
         console.log('sourceToTarget:  ')
         console.log(this.sourceToTarget);
+
+        let graphModels = Object.create(null);
+        for( let[k,v] of this.models) {
+          graphModels[k] = v;
+        }
+        let graphModelsJson = JSON.parse(JSON.stringify(graphModels));
+        console.log('json:')
+        console.log(graphModelsJson);
+
+        const result = this.$http.post(
+            '/validation',
+            graphModelsJson
+        ).then(function (response){
+          console.log(response);
+        });
+        console.log(result);
       }
 
     },
 
     //错误提示
     sendErrorMessage(ErrorMessage) {
-      this.$notify.error({
-        title: '错误',
-        message: ErrorMessage
-      });
+      this.notifyPromise = this.notifyPromise.then(this.$nextTick).then(() => {
+        this.$notify.error({
+          title: '错误',
+          message: ErrorMessage
+        });
+      })
+
     },
 
     handleChange(val) {
