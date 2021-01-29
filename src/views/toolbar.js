@@ -321,7 +321,7 @@ export const toolbarItems = [
     {
         icon: moduleIcon,
         title: 'Module',
-        value: '&lt;&lt;Module&gt;&gt;'+'</br>moduleName',
+        value: '&lt;&lt;Module&gt;&gt;',
         width: 260,
         height: 120,
         dropAble: false,
@@ -329,6 +329,14 @@ export const toolbarItems = [
         //实体里还有其他子cell，这些cell都应该为vertex
         //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
         children:[
+            {
+                value:'ModuleName',
+                offsetX : 0,
+                offsetY : 14,
+                width: 260,
+                height: 21,
+                style:'',
+            },
             {
                 value:'elementInModule: name(String)',
                 offsetX : 0,
@@ -374,28 +382,28 @@ export const toolbarItems = [
     {
         icon: aggregateIcon,
         title: 'Aggregate Root',
-        value: '&lt;&lt;Aggregate Root&gt;&gt;'+'</br>aggregateRootName',
-        width: 180,
-        height: 90,
+        value: '&lt;&lt;Aggregate Root&gt;&gt;',
+        width: 140,
+        height: 70,
         dropAble: false,
 
         //实体里还有其他子cell，这些cell都应该为vertex
         //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
         children:[
             {
-                value:'+identity : ID（String）',
+                value:'AggregateRootName',
                 offsetX : 0,
-                offsetY : 30,
-                width: 180,
-                height: 30,
-                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+                offsetY : 13,
+                width: 140,
+                height: 17,
+                style:'',
             },
             {
-                value:'operation : type',
+                value:'',
                 offsetX : 0,
-                offsetY : 60,
-                width: 180,
-                height: 30,
+                offsetY : 30,
+                width: 140,
+                height: 40,
                 style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
             },
 
@@ -435,28 +443,36 @@ export const toolbarItems = [
     {
         icon: repositoryIcon,
         title: 'Repository',
-        value: '&lt;&lt;Repository&gt;&gt;'+'</br>repositoryName',
-        width: 200,
-        height: 110,
+        value: '&lt;&lt;Repository&gt;&gt;',
+        width: 160,
+        height: 90,
         dropAble: false,
 
         //实体里还有其他子cell，这些cell都应该为vertex
         //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
         children:[
             {
+                value:'RepositoryName',
+                offsetX : 0,
+                offsetY : 14,
+                width: 160,
+                height: 15,
+                style:'',
+            },
+            {
                 value:'+aggregate : name（String）',
                 offsetX : 20,
-                offsetY : 42,
-                width: 160,
-                height: 30,
+                offsetY : 38,
+                width: 140,
+                height: 20,
                 style:'fillColor=none;strokeColor=rgba(255,255,255,0.2);fontColor=black;strokeWidth=1;',
             },
             {
                 value:'addActions : function',
-                offsetX : 20,
-                offsetY : 72,
-                width: 160,
-                height: 30,
+                offsetX : 10,
+                offsetY : 58,
+                width: 140,
+                height: 18,
                 style:'fillColor=none;strokeColor=rgba(255,255,255,0.2);fontColor=black;strokeWidth=1',
             }
 
@@ -495,8 +511,8 @@ export const toolbarItems = [
     {
         icon: factoryIcon,
         title: 'Factory',
-        value: '&lt;&lt;factory&gt;&gt;'+'</br>factoryName',
-        width: 220,
+        value: '&lt;&lt;factory&gt;&gt;',
+        width: 160,
         height: 78,
         dropAble: false,
 
@@ -504,12 +520,20 @@ export const toolbarItems = [
         //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
         children:[
             {
+                value:'FactoryName',
+                offsetX : 0,
+                offsetY : 15,
+                width: 160,
+                height: 15,
+                style:'',
+            },
+            {
                 value:'+objectName:name(String)',
                 offsetX : 0,
                 offsetY : 30,
-                width: 220,
+                width: 160,
                 height: 50,
-                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+                style:'fillColor=none;strokeColor=rgba(255,255,255,0.2);fontColor=black;strokeWidth=1;',
             }
 
         ],
@@ -517,7 +541,7 @@ export const toolbarItems = [
             fillColor: ' none',
             strokeColor: '#000000',
             strokeWidth: '1',
-            shape: mxConstants.SHAPE_RECTANGLE,
+            shape: mxConstants.SHAPE_CYLINDER,
             fontColor:'black',
             fontStyle: '0',
             align: 'center',
