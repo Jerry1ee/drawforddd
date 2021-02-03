@@ -321,7 +321,7 @@ export const toolbarItems = [
     {
         icon: moduleIcon,
         title: 'Module',
-        value: '&lt;&lt;Module&gt;&gt;'+'</br>moduleName',
+        value: '&lt;&lt;Module&gt;&gt;',
         width: 260,
         height: 120,
         dropAble: false,
@@ -329,6 +329,14 @@ export const toolbarItems = [
         //实体里还有其他子cell，这些cell都应该为vertex
         //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
         children:[
+            {
+                value:'ModuleName',
+                offsetX : 0,
+                offsetY : 14,
+                width: 260,
+                height: 21,
+                style:'',
+            },
             {
                 value:'elementInModule: name(String)',
                 offsetX : 0,
@@ -367,37 +375,37 @@ export const toolbarItems = [
      * 聚合
      * 需要将实体和值对象聚类到一致性边界内时，可以使用聚合作为容器
      * 聚合需要跟实体作为聚合的唯一标识，必填
-     * 聚合内部所有对象应该保持一致性，应该含有实体以及值对象，选填
+     * 聚合内部所有对象应该保持一致性，应该含有实体以及值对象，与实际的实体与值对象进行连线
      * 是否需要一些保证一致性的方法？选填
      * 怎样表示聚合和聚合内部实例
      */
     {
         icon: aggregateIcon,
-        title: 'Aggregate',
-        value: '&lt;&lt;Aggregate&gt;&gt;'+'</br>aggregateName',
-        width: 200,
-        height: 100,
+        title: 'Aggregate Root',
+        value: '&lt;&lt;Aggregate Root&gt;&gt;',
+        width: 140,
+        height: 70,
         dropAble: false,
 
         //实体里还有其他子cell，这些cell都应该为vertex
         //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
         children:[
             {
-                value:'+identity : ID（String）',
+                value:'AggregateRootName',
                 offsetX : 0,
-                offsetY : 30,
-                width: 200,
-                height: 30,
-                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+                offsetY : 13,
+                width: 140,
+                height: 17,
+                style:'',
             },
             {
-                value:'internalObject : name(String)',
+                value:'',
                 offsetX : 0,
-                offsetY : 60,
-                width: 200,
-                height: 60,
+                offsetY : 30,
+                width: 140,
+                height: 40,
                 style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
-            }
+            },
 
         ],
         style: {
@@ -435,37 +443,45 @@ export const toolbarItems = [
     {
         icon: repositoryIcon,
         title: 'Repository',
-        value: '&lt;&lt;Repository&gt;&gt;'+'</br>repositoryName',
-        width: 200,
-        height: 100,
+        value: '&lt;&lt;Repository&gt;&gt;',
+        width: 160,
+        height: 90,
         dropAble: false,
 
         //实体里还有其他子cell，这些cell都应该为vertex
         //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
         children:[
             {
-                value:'+aggregate : name（String）',
+                value:'RepositoryName',
                 offsetX : 0,
-                offsetY : 30,
-                width: 200,
-                height: 30,
-                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+                offsetY : 14,
+                width: 160,
+                height: 15,
+                style:'',
+            },
+            {
+                value:'+aggregate : name（String）',
+                offsetX : 20,
+                offsetY : 38,
+                width: 140,
+                height: 20,
+                style:'fillColor=none;strokeColor=rgba(255,255,255,0.2);fontColor=black;strokeWidth=1;',
             },
             {
                 value:'addActions : function',
-                offsetX : 0,
-                offsetY : 60,
-                width: 200,
-                height: 40,
-                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+                offsetX : 10,
+                offsetY : 58,
+                width: 140,
+                height: 18,
+                style:'fillColor=none;strokeColor=rgba(255,255,255,0.2);fontColor=black;strokeWidth=1',
             }
 
         ],
         style: {
             fillColor: ' none',
             strokeColor: '#000000',
-            strokeWidth: '1',
-            shape: mxConstants.SHAPE_RECTANGLE,
+            strokeWidth: '0',
+            shape: mxConstants.SHAPE_CYLINDER,
             fontColor:'black',
             fontStyle: '0',
             align: 'center',
@@ -495,8 +511,8 @@ export const toolbarItems = [
     {
         icon: factoryIcon,
         title: 'Factory',
-        value: '&lt;&lt;factory&gt;&gt;'+'</br>factoryName',
-        width: 220,
+        value: '&lt;&lt;factory&gt;&gt;',
+        width: 160,
         height: 78,
         dropAble: false,
 
@@ -504,12 +520,20 @@ export const toolbarItems = [
         //格式： value: 要填的值， x:cell位置横坐标 y:cell位置纵坐标 width:cell宽，height:cell高, style:样式
         children:[
             {
+                value:'FactoryName',
+                offsetX : 0,
+                offsetY : 15,
+                width: 160,
+                height: 15,
+                style:'',
+            },
+            {
                 value:'+objectName:name(String)',
                 offsetX : 0,
                 offsetY : 30,
-                width: 220,
+                width: 160,
                 height: 50,
-                style:'fillColor=none;strokeColor=#000000;fontColor=black;strokeWidth=1',
+                style:'fillColor=none;strokeColor=rgba(255,255,255,0.2);fontColor=black;strokeWidth=1;',
             }
 
         ],
@@ -517,7 +541,7 @@ export const toolbarItems = [
             fillColor: ' none',
             strokeColor: '#000000',
             strokeWidth: '1',
-            shape: mxConstants.SHAPE_RECTANGLE,
+            shape: mxConstants.SHAPE_CYLINDER,
             fontColor:'black',
             fontStyle: '0',
             align: 'center',
