@@ -74,8 +74,11 @@
           <el-button size="mini"  icon="el-icon-edit" @click="validation">验证</el-button>
           <el-button size="mini"  icon="el-icon-delete" @click="deleteCell">删除</el-button>
           <el-button size="mini"  icon="el-icon-top-left" @click="undo">撤销</el-button>
+          <el-button size="mini"  icon="el-icon-group" @click="group">组合</el-button>
+          <el-button size="mini"  icon="el-icon-ungroup" @click="ungroup">分解</el-button>
           <el-button size="mini"  icon="el-icon-zoom-out" @click="zoomOut"></el-button>
           <el-button size="mini"  icon="el-icon-zoom-in" @click="zoomIn"></el-button>
+
           <el-button size="mini" @click="showProperties">测试<i class="el-icon-upload el-icon--right"></i></el-button>
         </div>
         <div id="graphContainer" class="graphContainer" ref="container"></div>
@@ -96,15 +99,19 @@ import {Entity} from "@/components/patterns/Entity";
 import {ValueObject} from "@/components/patterns/ValueObject";
 const {
   mxEvent, mxUtils, mxEditor,mxGraphHandler, mxCell,
-  mxGeometry, mxConnectionHandler, mxImage, mxEdgeStyle, mxConstants,
-  mxCodec, mxRubberband,
+  mxGeometry, mxEdgeStyle, mxConstants,
+  mxCodec,
+
+    // mxImage, mxEllipse, mxConnectionConstraint, mxPoint,
+
+
 } = mxgraph;
 
 //导入ocl验证
 // import { OclEngine } from "@stekoe/ocl.js"
 //导入类
 
-const connectorIcon = require('../../public/icon/connector.gif');
+// const connectorIcon = require('../../public/icon/connector.gif');
 const {DomainService} = require("@/components/patterns/DomainService");
 const {DomainEvent} = require("@/components/patterns/DomainEvent");
 //导入graph容器组件
@@ -134,6 +141,13 @@ export default {
       //the map targetToSource
       targetToSource: null,
 
+      // //xmlDocument 描述图形的xml形式
+      // xmlDocument: null,
+      // valueToXmlNode: [],
+
+      //addCell时的Map，方便后面判断是否为顶级元素使用
+      topCells: new Map(),
+
 
       oclEngine: null,
 
@@ -158,7 +172,7 @@ export default {
     },
 
     isParentCell(mxCell){
-      return mxCell.getAttribute('parent') == 1;
+      return this.topCells.get(mxCell.getAttribute('id')) != null ;
     },
     //验证
     //使用 ocl 加 规则
@@ -194,6 +208,7 @@ export default {
           }
         }
 
+        let success = true;
         for(let i = 2; i < mxCells.length; i++) {
           /**
            * Entity
@@ -209,6 +224,7 @@ export default {
             let id = mxCells[i].getAttribute('id');
             let identityTemp = identity.replace(/\s*/g,"");
             if(identityTemp == '+Identity:type'||identity == '') {
+              success = false;
               this.sendErrorMessage('实体的唯一标识(Identity)不能为空或默认值')
 
             }else {
@@ -257,9 +273,11 @@ export default {
                 domainService.out.push(outObjectId);
                 this.models.set(id, domainService);
               }else if(inObjectId == null) {
+                success = false;
                 this.sendErrorMessage("领域服务没有连接输入对象！");
 
               }else {
+                success = false;
                 this.sendErrorMessage("领域服务没有连接输出对象！")
 
               }
@@ -272,9 +290,19 @@ export default {
 
           if(typeOfCell.replace(/\s*/g,"") == 'DomainEvent' &&
               this.isParentCell(mxCells[i])){
+            let id = mxCells[i].getAttribute('id');
             let name = mxCells[i+1].getAttribute('value');
             let domainEvent = new DomainEvent(typeOfCell, name);
-            this.models.push(domainEvent);
+
+            let inObjectId = this.targetToSource.get(id);
+            if(inObjectId == null) {
+              success = false;
+              this.sendErrorMessage("领域事件没有发送方！")
+            }else {
+              domainEvent.in.push(inObjectId);
+              this.models.set(id, domainEvent);
+            }
+
           }
 
           /**
@@ -293,6 +321,9 @@ export default {
            * ACL
            */
 
+        }
+        if(success){
+          this.sendSuccessMessage("验证全部通过！")
         }
         console.log('当前存在的所有对象模型：')
         console.log(this.models)
@@ -329,7 +360,16 @@ export default {
           message: ErrorMessage
         });
       })
+    },
 
+    //成功提示
+    sendSuccessMessage(SuccessMessage) {
+      this.notifyPromise = this.notifyPromise.then(this.$nextTick).then(() => {
+        this.$notify.success({
+          title: '成功',
+          message: SuccessMessage
+        });
+      })
     },
 
     handleChange(val) {
@@ -350,6 +390,16 @@ export default {
       this.editor.execute('undo', cell)
     },
 
+    //组合操作
+    group(cell){
+      this.editor.execute('group', cell);
+    },
+
+    //分解操作
+    ungroup(cell){
+      this.editor.execute('ungroup', cell);
+    },
+
     //放大画布
     zoomIn(cell){
       this.editor.execute('zoomIn', cell);
@@ -362,7 +412,7 @@ export default {
 
     //
     showProperties(cell){
-      this.editor.execute('edit', cell);
+      this.editor.execute('exportImage', cell);
     },
 
 
@@ -401,12 +451,11 @@ export default {
       let config = mxUtils.load('keyhandler-commons.xml').getDocumentElement();
       this.editor.configure(config);
 
-      // Defines an icon for creating new connections in the connection handler.
-      // This will automatically disable the highlighting of the source vertex.
-      mxConnectionHandler.prototype.connectImage = new mxImage(connectorIcon, 16, 16);
 
-      // this.graph.setAllowDanglingEdges(false);
 
+      //初始化连线
+      this.graph.setConnectableEdges(false)
+      this.graph.setDisconnectOnMove(false)
       //设置连线样式
       let style = this.graph.getStylesheet().getDefaultEdgeStyle();
       style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
@@ -428,12 +477,20 @@ export default {
 
 
       this.graph.setTooltips(true);     //鼠标悬停提示
-      this.graph.setDropEnabled(true);    //允许将子元素放入父元素中
       this.graph.setSplitEnabled(false);  //不允许分割元素
       this.graph.setAllowDanglingEdges(false);  //？？？
       this.graph.setPanning(true);  //允许右键拖动背景画布
       this.graph.setHtmlLabels(true); //允许html文本
       this.graph.setConnectable(true) // 允许连线
+      mxEvent.disableContextMenu(this.container);
+
+      // // Changes some default colors
+      mxConstants.HANDLE_FILLCOLOR = '#99ccff';
+      mxConstants.HANDLE_STROKECOLOR = '#0088cf';
+      mxConstants.VERTEX_SELECTION_COLOR = '#00a8ff';
+      mxConstants.STYLE_FILLCOLOR = '#ffffff';
+      // mxConstants.STYLE_STROKECOLOR = '#ffffff';
+      // mxConstants.STYLE_STROKE_OPACITY = 100;
       // this.graph.convertValueToString = (cell) => { // 根据cell生成显示的标签
       //   return this.R.prop('title', cell)
       // }
@@ -445,6 +502,19 @@ export default {
         console.info(cell + '被双击了') // 在控制台输出双击的cell
         console.log(cell.getValue())
       })
+
+      //为领域事件添加右键菜单
+      this.graph.popupMenuHandler.autoExpand = true;
+
+      this.graph.popupMenuHandler.factoryMethod = function (menu, cell) {
+          if(cell!=null){
+            menu.addItem('菜单项',null,function (){
+              mxUtils.alert("!");
+            });
+          }
+      }
+
+
 
       //在 editing stopped 时 触发
       // this.graph.addListener(mxEvent.CELLS_ADDED, (graph, evt) => {
@@ -490,8 +560,7 @@ export default {
     // 父元素位置 工具箱对象， x坐标，y坐标
     //根据 toolItems中的不同对象的不同参数，创建不同的cell，进行添加
     addCell(dropCell, toolItem, x, y) {
-
-      console.log('drop:'+dropCell);
+      // const drop = !this.R.isNil(dropCell)
       const realX = x;
       const realY = y;
       const {width, height} = toolItem;
@@ -520,13 +589,18 @@ export default {
           );
         }
 
+
         // vertex.title = toolItem['title']
         this.graph.addCell(cell, parent)
+        //将顶级元素添加到topCells中
+        this.topCells.set(cell.getId(),value);
+        console.log(this.topCells);
 
       } finally {
         this.graph.getModel().endUpdate()
       }
     },
+
 
     //核心方法，让工具箱项目可以被拖拽，放手时进行绘图
     initToolbar() {
@@ -556,7 +630,6 @@ export default {
         // 获取绘制cell位置的信息，如果释放位置有cell，获取该cell是否允许子元素加入
         const getDropTarget = (graph, x, y) => {
           const cell = graph.getCellAt(x, y)
-
           return this.R.propOr(null, 'dropAble', cell) ? cell : null
         }
 
@@ -569,7 +642,6 @@ export default {
     this.createGraph()
     this.initGraph()
     this.initToolbar()
-    new mxRubberband(this.graph);
     this.$refs.container.style.background = 'url("../mxgraph/images/grid.gif")'
   }
 }
@@ -629,6 +701,7 @@ export default {
   background-color: #8E8E8E;
 }
 
-
-
+.mxRubberband {
+  border-color: #0000DD;
+}
 </style>
