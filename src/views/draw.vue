@@ -17,11 +17,13 @@
               <el-menu-item index="/home" class="el_menu_item">主页</el-menu-item>
               <el-submenu index="2" class="el_menu_item">
                 <template slot="title">文件</template>
-                <el-menu-item index="">导入</el-menu-item>
+                <el-menu-item index="" @click="importXML">导入</el-menu-item>
+                <input type="file" style="display: none" id="importFile" name="importFile" @change="fileImported"
+                accept = ".xml">
                 <el-submenu index="">
                   <template slot="title">导出</template>
                   <el-menu-item index="" @click="exportXML">XML格式</el-menu-item>
-                  <el-menu-item index="2-4-2">选项2</el-menu-item>
+                  <el-menu-item index="" @click="exportImage">图像格式</el-menu-item>
                   <el-menu-item index="2-4-3">选项3</el-menu-item>
                 </el-submenu>
                 <el-menu-item index="">导出</el-menu-item>
@@ -78,8 +80,7 @@
           <el-button size="mini"  icon="el-icon-ungroup" @click="ungroup">分解</el-button>
           <el-button size="mini"  icon="el-icon-zoom-out" @click="zoomOut"></el-button>
           <el-button size="mini"  icon="el-icon-zoom-in" @click="zoomIn"></el-button>
-
-          <el-button size="mini" @click="showProperties">测试<i class="el-icon-upload el-icon--right"></i></el-button>
+          <el-button size="mini" @click="exportImage">测试<i class="el-icon-upload el-icon--right"></i></el-button>
         </div>
         <div id="graphContainer" class="graphContainer" ref="container"></div>
 
@@ -411,10 +412,59 @@ export default {
     },
 
     //
-    showProperties(cell){
+    exportImage(cell){
       this.editor.execute('exportImage', cell);
     },
 
+
+    //导入 xml
+    importXML(){
+      document.getElementById("importFile").click();
+    },
+
+    //导入xml后进行绘图
+    fileImported(){
+      let selectedFile = document.getElementById('importFile').files[0];
+      let name = selectedFile.name;   //读取选中文件的文件名
+      let size = selectedFile.size;   //读取选中文件的大小
+      console.log("文件名:"+name+"大小:"+size);
+
+      let that = this;
+
+      let reader = new FileReader();//这是核心,读取操作就是由它完成.
+      reader.readAsText(selectedFile);    //读取文件的内容,也可以读取文件的URL
+      reader.onload = function () {
+        //当读取完成后回调这个函数,然后此时文件的内容存储到了result中,直接操作即可
+        that.drawByXML(this.result);
+      }
+
+    },
+
+    //drawByXML
+    drawByXML(xml){
+      let doc = mxUtils.parseXml(xml);
+      let codec = new mxCodec(doc);
+      codec.decode(doc.documentElement, this.graph.getModel());
+      let elt = doc.documentElement.firstChild;
+      let cells = [];
+      while (elt != null)
+      {
+        let cell = codec.decode(elt)
+        if(cell != undefined){
+          if(cell.id != undefined && cell.parent != undefined && (cell.id == cell.parent)){
+            console.log("cell is : "+ cell);
+            elt = elt.nextSibling;
+            console.log("elt is :" + elt);
+            continue;
+          }
+          cells.push(cell);
+        }
+        elt = elt.nextSibling;
+      }
+      this.graph.addCells(cells);
+
+
+    },
 
 
     //导出 xml
@@ -423,8 +473,20 @@ export default {
       let node = encoder.encode(this.graph.getModel());
       let XML = mxUtils.getPrettyXml(node);
 
+      let elementA = document.createElement('a');
+
       let blob = new Blob([XML], {type: 'text/xml'});
       let url = URL.createObjectURL(blob);
+
+      elementA.href = url;
+      elementA.download = 'DDDModel.xml';
+      elementA.style.display = 'none';
+
+      document.body.append(elementA);
+      elementA.click();
+      document.body.removeChild(elementA);
+
+
       window.open(url);
       URL.revokeObjectURL(url); //Releases the resources
 
