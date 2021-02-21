@@ -62,26 +62,26 @@ export function validate() {
                 var curFactory=new Factory(i,mxCells[i+1].getAttribute('value'),
                     mxCells[i+2].getAttribute('value'));
                 m.set(i,curFactory);
-                console(curFactory.attributeValidation());
+                c(curFactory.attributeValidation());
             }
 
             if(value=='&lt;&lt;Aggregate Root&gt;&gt;'){
                 var curAggregateRoot=new AggregateRoot(i,mxCells[i+1].getAttribute('value'));
-                console(curAggregateRoot.attributeValidation());
+                c(curAggregateRoot.attributeValidation());
                 m.set(i,curAggregateRoot);
             }
 
             if(value=='&lt;&lt;Module&gt;&gt;'){
                 var curModule=new Module(i,mxCells[i+1].getAttribute('value'),
                     mxCells[i+2].getAttribute('value'));
-                console(curModule.attributeValidation());
+                c(curModule.attributeValidation());
                 m.set(i,curModule);
             }
 
             if(value=='&lt;&lt;Repository&gt;&gt;'){
                 var curRepository=new Repository(i,mxCells[i+1].getAttribute('value'),
                     mxCells[i+2].getAttribute('value'),mxCells[i+3].getAttribute('value'));
-                console(curRepository.attributeValidation());
+                c(curRepository.attributeValidation());
                 m.set(i,curRepository);
             }
 
@@ -156,7 +156,7 @@ export function getEdgeValidationMessage(value){
         if(edgeNumber==0||edgeNumber>1)
             edgeValidationArray.push("请给聚合根"+value.aggregateRootName+"连接且仅连接一个实体")
     }
-    console(edgeValidationArray)
+    c(edgeValidationArray)
 }
 
 
@@ -176,7 +176,7 @@ export function getMxCell(){
 }
 
 //展示错误信息,可以进行修改
-export function console(attributeValidationArray){
+export function c(attributeValidationArray){
     for(let i=0;i<attributeValidationArray.length;i++){
         console.log(attributeValidationArray[i]);
     }

@@ -9,13 +9,13 @@ export function Module(id,moduleName,moduleInstance){
     this.moduleInstance=moduleInstance;
     //用于判别
     this.type='Module';
-    this.inCell=[];
-    this.outCell=[];
+    this.in=[];
+    this.out=[];
     //用于输出该组件属性的错误信息
-    this.attributeValidation=function(){
+/*    this.attributeValidation=function(){
         var validationResult=new Array();
         if(moduleName=='ModuleName')
             validationResult.push("请输入模块的名称！")
         return validationResult;
-    }
+    }*/
 }

@@ -98,6 +98,10 @@ import {toolbarItems} from './toolbar'
 import mxgraph from '../mxgraph/mxgraph';
 import {Entity} from "@/components/patterns/Entity";
 import {ValueObject} from "@/components/patterns/ValueObject";
+import {Module} from "@/components/patterns/Module";
+import {Factory} from "@/components/patterns/Factory";
+import {Repository} from "@/components/patterns/Repository";
+import {AggregateRoot} from "@/components/patterns/AggregateRoot";
 const {
   mxEvent, mxUtils, mxEditor,mxGraphHandler, mxCell,
   mxGeometry, mxEdgeStyle, mxConstants,
@@ -210,7 +214,9 @@ export default {
         }
 
         let success = true;
+
         for(let i = 2; i < mxCells.length; i++) {
+
           /**
            * Entity
            * 如果当前cell的 type为 Entity 且 parent 为 1，那么该cell为实体
@@ -306,22 +312,181 @@ export default {
 
           }
 
-          /**
-           * Aggregate
-           */
 
-          /**
-           * Repository
-           */
+          let parentId=mxCells[i].getAttribute("parent");
 
-          /**
-           * Factory
-           */
+          //当组件的parentId为1时证明该节点为组件的头节点
+          if(parentId=="1"){
+            let type=mxCells[i].getAttribute('value');
+            /**
+             * Module
+             */
+            //当节点为Module时
+            if(type==="&lt;&lt;Module&gt;&gt;") {
+              let moduleName=mxCells[i+1].getAttribute('value')
+              if(moduleName=="ModuleName"||moduleName==""){
+                success=false;
+                this.sendErrorMessage("模块的名称不能为空或默认值！")
+              }
+
+                var curModule=new Module(i,moduleName,
+                    mxCells[i+2].getAttribute('value'));
+
+                //注意：目前并不知道是否真的将curModule放入了map中
+                this.models.set(i+"",curModule)
+
+            }
+
+            /**
+             * Factory
+             */
+            if(type=='&lt;&lt;factory&gt;&gt;'){
+              let factoryName=mxCells[i+1].getAttribute('value')
+              let instanceName=mxCells[i+2].getAttribute('value')
+              if(factoryName=='FactoryName'||factoryName==''){
+                success=false;
+                this.sendErrorMessage("请给工厂命名！")
+              }
+              if(instanceName=='+objectName:name(String)'||instanceName==''){
+                success=false;
+                this.sendErrorMessage("请输入工厂所创建的实体（或聚合）名称！如果没有，请考虑工厂的必要性！")
+              }
+
+                var curFactory = new Factory(i, factoryName,instanceName);
+                this.models.set(i+"", curFactory);
+
+            }
+
+            /**
+             * Repository
+             */
+            if(type=='&lt;&lt;Repository&gt;&gt;'){
+              let reName=mxCells[i+1].getAttribute('value')
+              let instanceName=mxCells[i+2].getAttribute('value')
+              if(reName=='RepositoryName'||reName==''){
+                success=false;
+                this.sendErrorMessage("请给资源库命名")
+              }
+              if(instanceName=='+aggregate : name（String）'||instanceName==''){
+                success=false;
+                this.sendErrorMessage("请输入资源库的实体（或聚合）名称！如果没有，请考虑资源库的必要性！")
+              }
+
+                var curRe = new Repository(i, reName,instanceName,mxCells[i+3].getAttribute('value'));
+                this.models.set(i+"", curRe);
+
+            }
+
+            /**
+             * Aggregate
+             */
+            if(type=='&lt;&lt;Aggregate Root&gt;&gt;'){
+              let arrName=mxCells[i+1].getAttribute('value')
+              if(arrName=='AggregateRootName'){
+                success=false;
+                this.sendErrorMessage("请给聚合根命名！")
+              }
+
+              var curAggregateRoot = new AggregateRoot(i, mxCells[i + 1].getAttribute('value'));
+              this.models.set(i+"", curAggregateRoot)
+
+            }
+
+            /**
+             * edge
+             * 处理边的属性,并将边之间的关系进行存储
+             */
+            if(type==null||type==''){
+              let source=mxCells[i].getAttribute('source')
+              let target=mxCells[i].getAttribute('target')
+              //this.sendErrorMessage(source)
+              while(mxCells[source].getAttribute('parent')!='1')
+                source=source-1;
+              //this.sendErrorMessage(source)
+              //this.sendErrorMessage(target)
+              while(mxCells[target].getAttribute('parent')!='1')
+                target=target-1;
+              //this.sendErrorMessage(target)
+              let sourceNode=this.models.get(source+"")
+              sourceNode.in.push(target+"")
+              let targetNode=this.models.get(target+"")
+              targetNode.in.push(source+"")
+            }
+          }
 
           /**
            * ACL
            */
 
+        }
+        /**
+         * 处理edge
+         在对每个节点的属性进行验证之后，需要对节点以及节点之间所连接的边进行验证
+         */
+        for (var [key] of this.models) {
+          let node=this.models.get(key)
+          let type=node["type"];
+          if(type=="Module"){
+            let edge=node.in
+            if(edge.length!=0){
+              success=false;
+              this.sendErrorMessage("请不要给Module组件添加连线！" +
+                  "Module中组件请直接输入在组件中")
+            }
+          }
+          if(type=="Factory"){
+            let edge=node.in
+            if(edge.length==0||edge.length>1){
+              success=false
+              this.sendErrorMessage("请给Factory连接一个它创建的实体（或聚合根）")
+            }
+            if(edge.length==1){
+              let neighborType=this.models.get(edge[0]).type
+              if(neighborType=="Entity") {
+                console.log("Factory连接的为实体")
+              }else if(neighborType=='AggregateRootName'){
+                console.log("Factory连接的是聚合根")
+              }else{
+                success=false;
+                this.sendErrorMessage("请给Factory连接正确的实体（聚合根）对象")
+              }
+            }
+          }
+          if(type=="Repository"){
+            let edge=node.in
+            if(edge.length==0||edge.length>1){
+              success=false
+              this.sendErrorMessage("请给Repository连接一个它所存储的实体（或聚合根）")
+            }
+            if(edge.length==1){
+              let neighborType=this.models.get(edge[0]).type
+              if(neighborType=="Entity") {
+                console.log("Repository连接的为实体")
+              }else if(neighborType=='AggregateRootName'){
+                console.log("Repository连接的是聚合根")
+              }else{
+                success=false;
+                this.sendErrorMessage("请给Repository连接正确的实体（聚合根）对象")
+              }
+            }
+          }
+          if(type=="AggregateRootName"){
+            let edge=node.in
+            if(edge.length==0||edge.length>1){
+              success=false
+              this.sendErrorMessage("请给聚合根连接一个他所包含的实体！")
+            }
+            if(edge.length==1){
+              let neighborType=this.models.get(edge[0]).type
+              if(neighborType=="Entity") {
+                console.log("聚合根连接的为实体")
+              }else{
+                success=false;
+                this.sendErrorMessage("请给聚合根连接正确的实体对象！")
+              }
+            }
+          }
+          //this.sendErrorMessage(type)
         }
         if(success){
           this.sendSuccessMessage("验证全部通过！")
@@ -342,13 +507,14 @@ export default {
         console.log('json:')
         console.log(graphModelsJson);
 
-        const result = this.$http.post(
+        //注释了前后端交互的代码，便于测试前端功能
+/*        const result = this.$http.post(
             '/validation',
             graphModelsJson
         ).then(function (response){
           console.log(response);
         });
-        console.log(result);
+        console.log(result);*/
       }
 
     },
