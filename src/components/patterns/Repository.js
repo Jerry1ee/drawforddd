@@ -9,8 +9,8 @@ export function Repository(id,repositoryName,instanceName,addAction){
     this.repositoryName=repositoryName;
     this.instanceName=instanceName;
     this.addAction=addAction;
-    this.inCell=[];
-    this.outCell=[];
+    this.in=[];
+    this.out=[];
     //用于判别
     this.type='Repository';
     //用于输出该组件的错误信息

@@ -10,8 +10,8 @@ export function Factory(id,factoryName,instanceName){
     this.instanceName=instanceName;
     //用于判别
     this.type='Factory';
-    this.inCell=[];
-    this.outCell=[];
+    this.in=[];
+    this.out=[];
     //用于输出该组件属性的错误信息
     this.attributeValidation=function(){
         var validationResult=new Array();
