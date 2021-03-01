@@ -1,14 +1,14 @@
 import mxgraph from '../mxgraph/mxgraph';
 const { mxConstants } = mxgraph;
 
-const entityIcon = require('../../public/icon/example.png');
-const valueObjectIcon = require('../../public/icon/example.png');
-const domainServiceIcon = require('../../public/icon/example.png');
-const domainEventIcon = require('../../public/icon/example.png');
-const moduleIcon = require('../../public/icon/example.png');
-const aggregateIcon = require('../../public/icon/example.png');
-const repositoryIcon = require('../../public/icon/example.png');
-const factoryIcon = require('../../public/icon/example.png');
+const entityIcon = require('../../public/icon/entityIcon.png');
+const valueObjectIcon = require('../../public/icon/valueObjectIcon.png');
+const domainServiceIcon = require('../../public/icon/domainServiceIcon.png');
+const domainEventIcon = require('../../public/icon/domainEventIcon.png');
+const moduleIcon = require('../../public/icon/moduleIcon.png');
+const aggregateIcon = require('../../public/icon/aggregateroot.png');
+const repositoryIcon = require('../../public/icon/repositoryIcon.png');
+const factoryIcon = require('../../public/icon/factoryIcon.png');
 const eventStepIcon = require('../../public/icon/example.png');
 // const antiCorrosionLayerIcon = require('../../public/icon/example.png');
 
