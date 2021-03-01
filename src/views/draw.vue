@@ -393,23 +393,27 @@ export default {
             }
 
             /**
-             * edge
              * 处理边的属性,并将边之间的关系进行存储
              */
-            if(type==null||type==''){
+            if(mxCells[i].getAttribute('edge')==1){
               let source=mxCells[i].getAttribute('source')
               let target=mxCells[i].getAttribute('target')
-              //this.sendErrorMessage(source)
-              while(mxCells[source].getAttribute('parent')!='1')
-                source=source-1;
-              //this.sendErrorMessage(source)
-              //this.sendErrorMessage(target)
-              while(mxCells[target].getAttribute('parent')!='1')
-                target=target-1;
-              //this.sendErrorMessage(target)
-              let sourceNode=this.models.get(source+"")
+              let sourceNode,targetNode;
+              for(let i = 2; i < mxCells.length; i++){
+                let id=mxCells[i].getAttribute('id')
+                if(id==source){
+                  if(mxCells[i].getAttribute('parent')!='1')
+                    source=mxCells[i].getAttribute('parent')
+                }
+                if(id==target){
+                  if(mxCells[i].getAttribute('parent')!='1')
+                    target=mxCells[i].getAttribute('parent')
+                }
+              }
+              //this.sendErrorMessage(source+" "+target)
+              sourceNode=this.models.get(source+"")
               sourceNode.in.push(target+"")
-              let targetNode=this.models.get(target+"")
+              targetNode=this.models.get(target+"")
               targetNode.in.push(source+"")
             }
           }
