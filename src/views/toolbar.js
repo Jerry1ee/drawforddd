@@ -513,7 +513,7 @@ export const toolbarItems = [
         title: 'Factory',
         value: '&lt;&lt;factory&gt;&gt;',
         width: 160,
-        height: 78,
+        height: 92,
         dropAble: false,
 
         //实体里还有其他子cell，这些cell都应该为vertex
@@ -529,9 +529,9 @@ export const toolbarItems = [
             },
             {
                 value:'+objectName:name(String)',
-                offsetX : 0,
-                offsetY : 30,
-                width: 160,
+                offsetX : 10,
+                offsetY : 35,
+                width: 140,
                 height: 50,
                 style:'fillColor=none;strokeColor=rgba(255,255,255,0.2);fontColor=black;strokeWidth=1;',
             }
