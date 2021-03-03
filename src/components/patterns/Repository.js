@@ -6,7 +6,7 @@
 * */
 export function Repository(id,repositoryName,instanceName,addAction){
     this.id=id;
-    this.repositoryName=repositoryName;
+    this.name=repositoryName;
     this.instanceName=instanceName;
     this.addAction=addAction;
     this.in=[];
