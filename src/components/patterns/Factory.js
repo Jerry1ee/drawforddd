@@ -6,7 +6,7 @@
 
 export function Factory(id,factoryName,instanceName){
     this.id=id;
-    this.factoryName=factoryName;
+    this.name=factoryName;
     this.instanceName=instanceName;
     //用于判别
     this.type='Factory';

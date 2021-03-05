@@ -460,8 +460,8 @@ export const toolbarItems = [
                 style:'',
             },
             {
-                value:'+aggregate : name（String）',
-                offsetX : 20,
+                value:'+aggregate : name',
+                offsetX : 10,
                 offsetY : 38,
                 width: 140,
                 height: 20,
