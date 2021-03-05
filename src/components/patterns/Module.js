@@ -5,7 +5,7 @@
 
 export function Module(id,moduleName,moduleInstance){
     this.id=id;
-    this.moduleName=moduleName;
+    this.name=moduleName;
     this.moduleInstance=moduleInstance;
     //用于判别
     this.type='Module';

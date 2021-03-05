@@ -6,7 +6,7 @@
 
 export function AggregateRoot(id,aggregateRootName){
     this.id=id;
-    this.aggregateRootName=aggregateRootName;
+    this.name=aggregateRootName;
     //用于判别
     this.type='AggregateRootName';
     this.in=[];

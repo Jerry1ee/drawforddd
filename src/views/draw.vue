@@ -323,17 +323,18 @@ export default {
              */
             //当节点为Module时
             if(type==="&lt;&lt;Module&gt;&gt;") {
+              let id=mxCells[i].getAttribute('id');
               let moduleName=mxCells[i+1].getAttribute('value')
               if(moduleName=="ModuleName"||moduleName==""){
                 success=false;
                 this.sendErrorMessage("模块的名称不能为空或默认值！")
               }
 
-                var curModule=new Module(i,moduleName,
+                var curModule=new Module(id,moduleName,
                     mxCells[i+2].getAttribute('value'));
 
                 //注意：目前并不知道是否真的将curModule放入了map中
-                this.models.set(i+"",curModule)
+                this.models.set(id,curModule)
 
             }
 
@@ -341,6 +342,7 @@ export default {
              * Factory
              */
             if(type=='&lt;&lt;factory&gt;&gt;'){
+              let id=mxCells[i].getAttribute('id')
               let factoryName=mxCells[i+1].getAttribute('value')
               let instanceName=mxCells[i+2].getAttribute('value')
               if(factoryName=='FactoryName'||factoryName==''){
@@ -352,8 +354,8 @@ export default {
                 this.sendErrorMessage("请输入工厂所创建的实体（或聚合）名称！如果没有，请考虑工厂的必要性！")
               }
 
-                var curFactory = new Factory(i, factoryName,instanceName);
-                this.models.set(i+"", curFactory);
+                var curFactory = new Factory(id, factoryName,instanceName);
+                this.models.set(id, curFactory);
 
             }
 
@@ -361,6 +363,7 @@ export default {
              * Repository
              */
             if(type=='&lt;&lt;Repository&gt;&gt;'){
+              let id=mxCells[i].getAttribute('id')
               let reName=mxCells[i+1].getAttribute('value')
               let instanceName=mxCells[i+2].getAttribute('value')
               if(reName=='RepositoryName'||reName==''){
@@ -372,44 +375,49 @@ export default {
                 this.sendErrorMessage("请输入资源库的实体（或聚合）名称！如果没有，请考虑资源库的必要性！")
               }
 
-                var curRe = new Repository(i, reName,instanceName,mxCells[i+3].getAttribute('value'));
-                this.models.set(i+"", curRe);
-
+                var curRe = new Repository(id, reName,instanceName,mxCells[i+3].getAttribute('value'));
+                this.models.set(id, curRe);
+                //this.sendErrorMessage(this.models.get(i+"").in+" "+i);
             }
 
             /**
              * Aggregate
              */
             if(type=='&lt;&lt;Aggregate Root&gt;&gt;'){
+              let id=mxCells[i].getAttribute('id')
               let arrName=mxCells[i+1].getAttribute('value')
               if(arrName=='AggregateRootName'){
                 success=false;
                 this.sendErrorMessage("请给聚合根命名！")
               }
 
-              var curAggregateRoot = new AggregateRoot(i, mxCells[i + 1].getAttribute('value'));
-              this.models.set(i+"", curAggregateRoot)
+              var curAggregateRoot = new AggregateRoot(id, mxCells[i + 1].getAttribute('value'));
+              this.models.set(id, curAggregateRoot)
 
             }
 
             /**
-             * edge
              * 处理边的属性,并将边之间的关系进行存储
              */
-            if(type==null||type==''){
+            if(mxCells[i].getAttribute('edge')==1){
               let source=mxCells[i].getAttribute('source')
               let target=mxCells[i].getAttribute('target')
-              //this.sendErrorMessage(source)
-              while(mxCells[source].getAttribute('parent')!='1')
-                source=source-1;
-              //this.sendErrorMessage(source)
-              //this.sendErrorMessage(target)
-              while(mxCells[target].getAttribute('parent')!='1')
-                target=target-1;
-              //this.sendErrorMessage(target)
-              let sourceNode=this.models.get(source+"")
+              let sourceNode,targetNode;
+              for(let i = 2; i < mxCells.length; i++){
+                let id=mxCells[i].getAttribute('id')
+                if(id==source){
+                  if(mxCells[i].getAttribute('parent')!='1')
+                    source=mxCells[i].getAttribute('parent')
+                }
+                if(id==target){
+                  if(mxCells[i].getAttribute('parent')!='1')
+                    target=mxCells[i].getAttribute('parent')
+                }
+              }
+              //this.sendErrorMessage(source+" "+target)
+              sourceNode=this.models.get(source+"")
               sourceNode.in.push(target+"")
-              let targetNode=this.models.get(target+"")
+              targetNode=this.models.get(target+"")
               targetNode.in.push(source+"")
             }
           }

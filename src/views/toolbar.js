@@ -1,14 +1,14 @@
 import mxgraph from '../mxgraph/mxgraph';
 const { mxConstants } = mxgraph;
 
-const entityIcon = require('../../public/icon/example.png');
-const valueObjectIcon = require('../../public/icon/example.png');
-const domainServiceIcon = require('../../public/icon/example.png');
-const domainEventIcon = require('../../public/icon/example.png');
-const moduleIcon = require('../../public/icon/example.png');
-const aggregateIcon = require('../../public/icon/example.png');
-const repositoryIcon = require('../../public/icon/example.png');
-const factoryIcon = require('../../public/icon/example.png');
+const entityIcon = require('../../public/icon/entityIcon.png');
+const valueObjectIcon = require('../../public/icon/valueObjectIcon.png');
+const domainServiceIcon = require('../../public/icon/domainServiceIcon.png');
+const domainEventIcon = require('../../public/icon/domainEventIcon.png');
+const moduleIcon = require('../../public/icon/moduleIcon.png');
+const aggregateIcon = require('../../public/icon/aggregateroot.png');
+const repositoryIcon = require('../../public/icon/repositoryIcon.png');
+const factoryIcon = require('../../public/icon/factoryIcon.png');
 const eventStepIcon = require('../../public/icon/example.png');
 // const antiCorrosionLayerIcon = require('../../public/icon/example.png');
 
@@ -460,8 +460,8 @@ export const toolbarItems = [
                 style:'',
             },
             {
-                value:'+aggregate : name（String）',
-                offsetX : 20,
+                value:'+aggregate : name',
+                offsetX : 10,
                 offsetY : 38,
                 width: 140,
                 height: 20,
@@ -513,7 +513,7 @@ export const toolbarItems = [
         title: 'Factory',
         value: '&lt;&lt;factory&gt;&gt;',
         width: 160,
-        height: 78,
+        height: 92,
         dropAble: false,
 
         //实体里还有其他子cell，这些cell都应该为vertex
@@ -529,9 +529,9 @@ export const toolbarItems = [
             },
             {
                 value:'+objectName:name(String)',
-                offsetX : 0,
-                offsetY : 30,
-                width: 160,
+                offsetX : 10,
+                offsetY : 35,
+                width: 140,
                 height: 50,
                 style:'fillColor=none;strokeColor=rgba(255,255,255,0.2);fontColor=black;strokeWidth=1;',
             }
