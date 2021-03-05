@@ -8,3 +8,11 @@ export function Entity(type, id, name, identity) {
     this.out = [];
 }
 
+// const oclResult = OclEngine.create()
+//     .addOclExpression(`
+//      -- 实体的唯一标识不能为空
+//      context Entity inv:
+//          self.identity->notEmpty()
+//   `)
+//     .evaluate(new Person());
+
