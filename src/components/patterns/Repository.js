@@ -23,3 +23,25 @@ export function Repository(id,repositoryName,instanceName,addAction){
         return validationResult;
     }
 }
+
+
+// const oclResult = OclEngine.create()
+//     .addOclExpression(`
+//      -- 资源库不能有其他构造型
+//      context Repository inv:
+//          self.base_Class.extension_Entity = null and
+//          self.base_Class.extension_ValueObject = null and
+//          self.base_Class.extension_DomainEvent = null and
+//          self.base_Class.extension_AggregateRoot = null and
+//          self.base_Class.extension_DomainService = null and
+//          self.base_Class.extension_DomainEvent = null
+//      -- 只为实体或聚合根提供资源库，out为资源库连接的对象数组
+//      context Repository inv:
+//          self.out->notEmpty() and
+//          (self.out->exists(object | object.type = 'AggregateRoot') or
+//          self.out->exists(object | object.type = 'Entity'))
+//      -- 资源库只定义方法，且至少定义一个方法
+//      context Repository inv:
+//          self.operation->notEmpty()
+//   `)
+//     .evaluate(new Person());
